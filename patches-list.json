@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "patches": [
+    {
+      "name": "RingConn Health Data Provider",
+      "description": "Enables debugging, registers HealthDataProvider in AndroidManifest.xml and injects local database access for Intervals Direct.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.gdjztech.ringconn",
+          "name": "RingConn",
+          "description": "Smart Ring companion app",
+          "apkFileType": "APK",
+          "appIconColor": "#1E88E5",
+          "signatures": null,
+          "targets": [
+            {
+              "version": null,
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Supports any version of RingConn"
+            }
+          ]
+        }
+      ],
+      "options": []
+    }
+  ]
+}
