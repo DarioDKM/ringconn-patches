@@ -31,7 +31,7 @@ You do **not** need a computer, terminal, ADB, or root access. Everything runs d
 5. Tap **Add**. Morphe Manager will fetch the patch definitions and bundle.
 
 > [!TIP]
-> **1-Click Deep Link:** On your Android phone, tap [Add to Morphe](https://morphe.software/add-source?url=github.com/DarioDKM/ringconn-patches) to automatically open Morphe Manager and register the source.
+> **1-Click Deep Link:** On your Android phone, tap [Add to Morphe](https://morphe.software/add-source?github=DarioDKM/ringconn-patches) to automatically open Morphe Manager and register the source.
 
 ### Step 2: Patch RingConn
 
