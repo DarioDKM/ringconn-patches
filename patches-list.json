@@ -1,9 +1,9 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "patches": [
     {
-      "name": "RingConn Health Data Provider",
-      "description": "Enables debugging, registers HealthDataProvider in AndroidManifest.xml and injects local database access for Intervals Direct.",
+      "name": "RingConn Health Data Provider & Embedded Sync",
+      "description": "Enables debugging, registers HealthDataProvider for companion apps, and injects embedded Intervals Direct Dark Dashboard with direct sync to intervals.icu.",
       "default": true,
       "dependencies": [],
       "compatiblePackages": [

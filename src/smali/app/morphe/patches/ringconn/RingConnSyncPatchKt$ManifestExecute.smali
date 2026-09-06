@@ -14,7 +14,7 @@
 
 # virtual methods
 .method public final invoke(Lapp/morphe/patcher/patch/ResourcePatchContext;)Lkotlin/Unit;
-    .locals 8
+    .locals 9
 
     const-string v0, "AndroidManifest.xml"
     invoke-virtual {p1, v0}, Lapp/morphe/patcher/patch/ResourcePatchContext;->document(Ljava/lang/String;)Lapp/morphe/patcher/util/Document;
@@ -34,7 +34,7 @@
     move-result-object v2
     check-cast v2, Lorg/w3c/dom/Element;
 
-    # Setze android:debuggable="true"
+    # Setze android:debuggable="true" (fuer Entwickler- und Companion-Zugriff)
     const-string v3, "android:debuggable"
     const-string v4, "true"
     invoke-interface {v2, v3, v4}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
@@ -55,8 +55,8 @@
     const-string v7, "android:name"
     invoke-interface {v6, v7}, Lorg/w3c/dom/Element;->getAttribute(Ljava/lang/String;)Ljava/lang/String;
     move-result-object v7
-    const-string v1, "com.gdjztech.ringconn.provider.HealthDataProvider"
-    invoke-virtual {v1, v7}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    const-string v8, "com.gdjztech.ringconn.provider.HealthDataProvider"
+    invoke-virtual {v8, v7}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v7
     if-eqz v7, :cond_next
     goto :done_provider
@@ -67,31 +67,107 @@
 
     :cond_exists_check_end
     # Erzeuge <provider>
-    move-object v1, v0
-    check-cast v1, Lapp/morphe/patcher/util/Document;
     const-string v3, "provider"
     invoke-virtual {v1, v3}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
-    move-result-object v1
+    move-result-object v3
 
-    const-string v3, "android:name"
-    const-string v4, "com.gdjztech.ringconn.provider.HealthDataProvider"
-    invoke-interface {v1, v3, v4}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+    const-string v4, "android:name"
+    const-string v5, "com.gdjztech.ringconn.provider.HealthDataProvider"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string v3, "android:authorities"
-    const-string v4, "com.gdjztech.ringconn.debug.provider"
-    invoke-interface {v1, v3, v4}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+    const-string v4, "android:authorities"
+    const-string v5, "com.gdjztech.ringconn.debug.provider"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string v3, "android:exported"
-    const-string v4, "true"
-    invoke-interface {v1, v3, v4}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+    const-string v4, "android:exported"
+    const-string v5, "true"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string v3, "android:grantUriPermissions"
-    const-string v4, "true"
-    invoke-interface {v1, v3, v4}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+    const-string v4, "android:grantUriPermissions"
+    const-string v5, "true"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-interface {v2, v1}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
+    invoke-interface {v2, v3}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
 
     :done_provider
+    # Pruefe ob IntervalsActivity bereits existiert
+    const-string v3, "activity"
+    invoke-virtual {v1, v3}, Lapp/morphe/patcher/util/Document;->getElementsByTagName(Ljava/lang/String;)Lorg/w3c/dom/NodeList;
+    move-result-object v3
+    invoke-interface {v3}, Lorg/w3c/dom/NodeList;->getLength()I
+    move-result v4
+    const/4 v5, 0x0
+
+    :goto_act
+    if-ge v5, v4, :cond_act_check_end
+    invoke-interface {v3, v5}, Lorg/w3c/dom/NodeList;->item(I)Lorg/w3c/dom/Node;
+    move-result-object v6
+    check-cast v6, Lorg/w3c/dom/Element;
+    const-string v7, "android:name"
+    invoke-interface {v6, v7}, Lorg/w3c/dom/Element;->getAttribute(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v7
+    const-string v8, "com.gdjztech.ringconn.ui.IntervalsActivity"
+    invoke-virtual {v8, v7}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v7
+    if-eqz v7, :cond_act_next
+    goto :done_activity
+
+    :cond_act_next
+    add-int/lit8 v5, v5, 0x1
+    goto :goto_act
+
+    :cond_act_check_end
+    # Erzeuge <activity>
+    const-string v3, "activity"
+    invoke-virtual {v1, v3}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
+    move-result-object v3
+
+    const-string v4, "android:name"
+    const-string v5, "com.gdjztech.ringconn.ui.IntervalsActivity"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v4, "android:exported"
+    const-string v5, "true"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v4, "android:label"
+    const-string v5, "Intervals Sync"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v4, "android:theme"
+    const-string v5, "@android:style/Theme.DeviceDefault.NoActionBar"
+    invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+
+    # Erzeuge <intent-filter>
+    const-string v4, "intent-filter"
+    invoke-virtual {v1, v4}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
+    move-result-object v4
+
+    # Erzeuge <action>
+    const-string v5, "action"
+    invoke-virtual {v1, v5}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
+    move-result-object v5
+    const-string v6, "android:name"
+    const-string v7, "android.intent.action.MAIN"
+    invoke-interface {v5, v6, v7}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-interface {v4, v5}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
+
+    # Erzeuge <category>
+    const-string v5, "category"
+    invoke-virtual {v1, v5}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
+    move-result-object v5
+    const-string v6, "android:name"
+    const-string v7, "android.intent.category.LAUNCHER"
+    invoke-interface {v5, v6, v7}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-interface {v4, v5}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
+
+    # Fuege <intent-filter> zu <activity> hinzu
+    invoke-interface {v3, v4}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
+
+    # Fuege <activity> zu <application> hinzu
+    invoke-interface {v2, v3}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
+
+    :done_activity
     sget-object v1, Lkotlin/Unit;->INSTANCE:Lkotlin/Unit;
     :try_end_0
     .catchall {:try_start_0 .. :try_end_0} :catchall_0

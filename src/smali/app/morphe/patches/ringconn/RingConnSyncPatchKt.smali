@@ -25,8 +25,8 @@
     # 2. Erzeuge ringconnSyncPatch (BytecodePatch)
     new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;
     invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;-><init>()V
-    const-string v0, "RingConn Health Data Provider"
-    const-string v1, "Enables debugging, injects HealthDataProvider and exposes raw ring_conn.db tables for Intervals Direct."
+    const-string v0, "RingConn Health Data Provider & Embedded Sync"
+    const-string v1, "Enables debugging, injects HealthDataProvider and embedded Intervals Direct Dark Dashboard with direct sync."
     const/4 v2, 0x1
     const/4 v4, 0x0
     const/4 v5, 0x0
