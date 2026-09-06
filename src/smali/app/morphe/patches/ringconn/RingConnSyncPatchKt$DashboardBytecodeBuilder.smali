@@ -1,4 +1,4 @@
-.class final Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;
+.class final Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardBytecodeBuilder;
 .super Ljava/lang/Object;
 .source "RingConnSyncPatch.kt"
 
@@ -35,11 +35,16 @@
     aput-object v1, v2, v3
     invoke-virtual {p1, v2}, Lapp/morphe/patcher/patch/BytecodePatchBuilder;->compatibleWith([Lapp/morphe/patcher/patch/Compatibility;)V
 
-    # 2. Dependency: ManifestPatch
+    # 2. Dependency: DashboardManifestPatch & ProviderPatch
+    const/4 v0, 0x2
     new-array v1, v0, [Lapp/morphe/patcher/patch/Patch;
-    invoke-static {}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->getManifestPatch()Lapp/morphe/patcher/patch/ResourcePatch;
+    invoke-static {}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->getDashboardManifestPatch()Lapp/morphe/patcher/patch/ResourcePatch;
     move-result-object v2
     aput-object v2, v1, v3
+    invoke-static {}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->getProviderPatch()Lapp/morphe/patcher/patch/BytecodePatch;
+    move-result-object v2
+    const/4 v4, 0x1
+    aput-object v2, v1, v4
     invoke-virtual {p1, v1}, Lapp/morphe/patcher/patch/BytecodePatchBuilder;->dependsOn([Lapp/morphe/patcher/patch/Patch;)V
 
     # 3. Extension: extensions/HealthDataProvider.dex
@@ -61,7 +66,7 @@
 .method public bridge synthetic invoke(Ljava/lang/Object;)Ljava/lang/Object;
     .locals 0
     check-cast p1, Lapp/morphe/patcher/patch/BytecodePatchBuilder;
-    invoke-virtual {p0, p1}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;->invoke(Lapp/morphe/patcher/patch/BytecodePatchBuilder;)Lkotlin/Unit;
+    invoke-virtual {p0, p1}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardBytecodeBuilder;->invoke(Lapp/morphe/patcher/patch/BytecodePatchBuilder;)Lkotlin/Unit;
     move-result-object p1
     return-object p1
 .end method

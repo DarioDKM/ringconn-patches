@@ -26,6 +26,7 @@ public class IntervalsSyncEngine {
     public static final String KEY_ATHLETE_ID = "athlete_id";
     public static final String KEY_API_KEY = "api_key";
     public static final String KEY_AUTO_SYNC = "auto_sync";
+    public static final String KEY_SCORE_SOURCE = "score_source"; // "athletic" or "ringconn"
     public static final String KEY_LAST_SYNC_TIME = "last_sync_time";
     public static final String KEY_LAST_SYNC_STATUS = "last_sync_status";
     public static final String KEY_LOGS = "sync_logs";
@@ -46,6 +47,51 @@ public class IntervalsSyncEngine {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
+    public static int calculateAthleticSleepScore(int sleepDurationMin, int deepMin, int remMin, int awakeMin) {
+        if (sleepDurationMin <= 0) return 0;
+
+        // 1. Non-linear duration fulfillment (40 pts max, baseline 480 min = 8h 00m)
+        double ratio = Math.min(1.0, sleepDurationMin / 480.0);
+        double durationScore = 40.0 * Math.pow(ratio, 2.2);
+
+        // 2. Deep sleep (SWS) restorative volume (25 pts max, target >= 90 min)
+        double deepRatio = Math.min(1.0, deepMin / 90.0);
+        double deepScore = 25.0 * Math.pow(deepRatio, 1.5);
+
+        // 3. REM sleep neural & motor recovery (20 pts max, target >= 100 min)
+        double remRatio = Math.min(1.0, remMin / 100.0);
+        double remScore = 20.0 * Math.pow(remRatio, 1.5);
+
+        // 4. Sleep efficiency & wakefulness continuity (15 pts max)
+        int inBed = sleepDurationMin + awakeMin;
+        double efficiency = inBed > 0 ? ((double) sleepDurationMin / inBed) : 1.0;
+
+        double effScore;
+        if (efficiency >= 0.92) effScore = 8.0;
+        else if (efficiency >= 0.88) effScore = 6.5 + (efficiency - 0.88) / 0.04 * 1.5;
+        else if (efficiency >= 0.84) effScore = 4.5 + (efficiency - 0.84) / 0.04 * 2.0;
+        else if (efficiency >= 0.80) effScore = 2.5 + (efficiency - 0.80) / 0.04 * 2.0;
+        else effScore = 0.0;
+
+        double wasoScore;
+        if (awakeMin <= 15) wasoScore = 7.0;
+        else if (awakeMin <= 25) wasoScore = 5.5;
+        else if (awakeMin <= 40) wasoScore = 3.5;
+        else if (awakeMin <= 60) wasoScore = 1.5;
+        else wasoScore = 0.0;
+
+        double continuityScore = Math.min(15.0, effScore + wasoScore);
+        double total = durationScore + deepScore + remScore + continuityScore;
+        return (int) Math.max(1, Math.min(100, Math.round(total)));
+    }
+
+    public static int computeSleepQuality(int score) {
+        if (score >= 85) return 1; // Great
+        if (score >= 70) return 2; // Good
+        if (score >= 50) return 3; // Avg
+        return 4;                  // Poor
+    }
+
     public static String getSettingsJson(Context context) {
         SharedPreferences prefs = getPrefs(context);
         JSONObject obj = new JSONObject();
@@ -53,6 +99,7 @@ public class IntervalsSyncEngine {
             obj.put("athleteId", prefs.getString(KEY_ATHLETE_ID, ""));
             obj.put("apiKey", prefs.getString(KEY_API_KEY, ""));
             obj.put("autoSync", prefs.getBoolean(KEY_AUTO_SYNC, true));
+            obj.put("scoreSource", prefs.getString(KEY_SCORE_SOURCE, "athletic"));
             obj.put("lastSyncTime", prefs.getLong(KEY_LAST_SYNC_TIME, 0));
             obj.put("lastSyncStatus", prefs.getString(KEY_LAST_SYNC_STATUS, "Never synced"));
         } catch (Exception e) {
@@ -61,13 +108,15 @@ public class IntervalsSyncEngine {
         return obj.toString();
     }
 
-    public static void saveSettings(Context context, String athleteId, String apiKey, boolean autoSync) {
+    public static void saveSettings(Context context, String athleteId, String apiKey, boolean autoSync, String scoreSource) {
         SharedPreferences.Editor ed = getPrefs(context).edit();
         ed.putString(KEY_ATHLETE_ID, athleteId != null ? athleteId.trim() : "");
         ed.putString(KEY_API_KEY, apiKey != null ? apiKey.trim() : "");
         ed.putBoolean(KEY_AUTO_SYNC, autoSync);
+        ed.putString(KEY_SCORE_SOURCE, scoreSource != null && scoreSource.equalsIgnoreCase("ringconn") ? "ringconn" : "athletic");
         ed.apply();
     }
+
 
     public static void appendLog(Context context, String message) {
         SharedPreferences prefs = getPrefs(context);
@@ -100,6 +149,9 @@ public class IntervalsSyncEngine {
         if (db == null) {
             return array.toString();
         }
+
+        SharedPreferences prefs = getPrefs(context);
+        String scoreSource = prefs.getString(KEY_SCORE_SOURCE, "athletic");
 
         Cursor cursor = null;
         try {
@@ -153,24 +205,42 @@ public class IntervalsSyncEngine {
                     if (colTempOffset >= 0 && !cursor.isNull(colTempOffset)) {
                         row.put("tempOffset", Math.round(cursor.getFloat(colTempOffset) * 100.0f) / 100.0);
                     }
+                    int deepMins = 0;
                     if (colDeep >= 0 && !cursor.isNull(colDeep)) {
-                        row.put("deepMinutes", (int) cursor.getFloat(colDeep));
+                        deepMins = (int) cursor.getFloat(colDeep);
+                        row.put("deepMinutes", deepMins);
                     }
+                    int remMins = 0;
                     if (colRem >= 0 && !cursor.isNull(colRem)) {
-                        row.put("remMinutes", (int) cursor.getFloat(colRem));
+                        remMins = (int) cursor.getFloat(colRem);
+                        row.put("remMinutes", remMins);
                     }
                     if (colLight >= 0 && !cursor.isNull(colLight)) {
                         row.put("lightMinutes", (int) cursor.getFloat(colLight));
                     }
+                    int awakeMins = 0;
                     if (colAwake >= 0 && !cursor.isNull(colAwake)) {
-                        row.put("awakeMinutes", (int) cursor.getFloat(colAwake));
+                        awakeMins = (int) cursor.getFloat(colAwake);
+                        row.put("awakeMinutes", awakeMins);
                     }
+                    int totalSleepMins = 0;
                     if (colSleepDur >= 0 && !cursor.isNull(colSleepDur)) {
-                        row.put("sleepDurationMinutes", (int) cursor.getFloat(colSleepDur));
+                        totalSleepMins = (int) cursor.getFloat(colSleepDur);
+                        row.put("sleepDurationMinutes", totalSleepMins);
                     }
+
+                    int rcScore = 0;
                     if (colScore >= 0 && !cursor.isNull(colScore)) {
-                        row.put("score", cursor.getInt(colScore));
+                        rcScore = cursor.getInt(colScore);
                     }
+                    int athleticScore = calculateAthleticSleepScore(totalSleepMins, deepMins, remMins, awakeMins);
+                    int finalScore = "ringconn".equalsIgnoreCase(scoreSource) ? rcScore : athleticScore;
+
+                    row.put("ringconnScore", rcScore);
+                    row.put("athleticScore", athleticScore);
+                    row.put("score", finalScore);
+                    row.put("scoreSource", scoreSource);
+
                     if (colSpo2 >= 0 && !cursor.isNull(colSpo2)) {
                         row.put("spo2", Math.round(cursor.getFloat(colSpo2) * 10.0f) / 10.0);
                     }
@@ -193,6 +263,7 @@ public class IntervalsSyncEngine {
         SharedPreferences prefs = getPrefs(context);
         String athleteId = prefs.getString(KEY_ATHLETE_ID, "").trim();
         String apiKey = prefs.getString(KEY_API_KEY, "").trim();
+        String scoreSource = prefs.getString(KEY_SCORE_SOURCE, "athletic");
 
         if (athleteId.isEmpty() || apiKey.isEmpty()) {
             try {
@@ -241,18 +312,30 @@ public class IntervalsSyncEngine {
             int colDeep = cursor.getColumnIndex("deepDuration");
             int colRem = cursor.getColumnIndex("remDuration");
             int colLight = cursor.getColumnIndex("lightDuration");
+            int colAwake = cursor.getColumnIndex("awakeDuration");
             int colSleepDur = cursor.getColumnIndex("sleepDuration");
             int colScore = cursor.getColumnIndex("sleepScore");
             int colSpo2 = cursor.getColumnIndex("spo2Avg");
 
+            int totalMins = 0;
             if (colSleepDur >= 0 && !cursor.isNull(colSleepDur)) {
-                int totalMins = (int) cursor.getFloat(colSleepDur);
+                totalMins = (int) cursor.getFloat(colSleepDur);
                 if (totalMins > 0) payload.put("sleepSecs", totalMins * 60);
             }
-            if (colScore >= 0 && !cursor.isNull(colScore)) {
-                int sc = cursor.getInt(colScore);
-                if (sc > 0) payload.put("sleepScore", sc);
+
+            int deepMins = (colDeep >= 0 && !cursor.isNull(colDeep)) ? (int) cursor.getFloat(colDeep) : 0;
+            int remMins = (colRem >= 0 && !cursor.isNull(colRem)) ? (int) cursor.getFloat(colRem) : 0;
+            int awakeMins = (colAwake >= 0 && !cursor.isNull(colAwake)) ? (int) cursor.getFloat(colAwake) : 0;
+
+            int rcScore = (colScore >= 0 && !cursor.isNull(colScore)) ? cursor.getInt(colScore) : 0;
+            int athleticScore = calculateAthleticSleepScore(totalMins, deepMins, remMins, awakeMins);
+            int chosenScore = "ringconn".equalsIgnoreCase(scoreSource) ? rcScore : athleticScore;
+
+            if (chosenScore > 0) {
+                payload.put("sleepScore", chosenScore);
+                payload.put("sleepQuality", computeSleepQuality(chosenScore));
             }
+
             if (colRestingHr >= 0 && !cursor.isNull(colRestingHr)) {
                 int rhr = cursor.getInt(colRestingHr);
                 if (rhr > 0) payload.put("restingHR", rhr);
@@ -274,13 +357,11 @@ public class IntervalsSyncEngine {
             if (colTempOffset >= 0 && !cursor.isNull(colTempOffset)) {
                 payload.put("skinTemp", Math.round(cursor.getFloat(colTempOffset) * 100.0) / 100.0);
             }
-            if (colDeep >= 0 && !cursor.isNull(colDeep)) {
-                int d = (int) cursor.getFloat(colDeep);
-                if (d > 0) payload.put("DeepSleep", d);
+            if (deepMins > 0) {
+                payload.put("DeepSleep", deepMins);
             }
-            if (colRem >= 0 && !cursor.isNull(colRem)) {
-                int r = (int) cursor.getFloat(colRem);
-                if (r > 0) payload.put("RemSleep", r);
+            if (remMins > 0) {
+                payload.put("RemSleep", remMins);
             }
             if (colLight >= 0 && !cursor.isNull(colLight)) {
                 int l = (int) cursor.getFloat(colLight);
@@ -329,7 +410,8 @@ public class IntervalsSyncEngine {
             result.put("message", "HTTP " + responseCode + (isSuccess ? " OK" : ": " + resp.toString()));
             result.put("date", targetDate);
 
-            String statusSummary = isSuccess ? "Synced " + targetDate + " (HTTP " + responseCode + ")" : "Failed " + targetDate + " (" + responseCode + ")";
+            String sourceLabel = "ringconn".equalsIgnoreCase(scoreSource) ? "Official" : "Athletic";
+            String statusSummary = isSuccess ? "Synced " + targetDate + " (Score " + chosenScore + " [" + sourceLabel + "], HTTP " + responseCode + ")" : "Failed " + targetDate + " (" + responseCode + ")";
             prefs.edit()
                     .putLong(KEY_LAST_SYNC_TIME, System.currentTimeMillis())
                     .putString(KEY_LAST_SYNC_STATUS, statusSummary)

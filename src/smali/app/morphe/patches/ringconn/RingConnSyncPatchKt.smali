@@ -3,16 +3,18 @@
 .source "RingConnSyncPatch.kt"
 
 # static fields
-.field private static final ringconnSyncPatch:Lapp/morphe/patcher/patch/BytecodePatch;
-.field private static final manifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+.field private static final providerManifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+.field private static final providerPatch:Lapp/morphe/patcher/patch/BytecodePatch;
+.field private static final dashboardManifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+.field private static final dashboardPatch:Lapp/morphe/patcher/patch/BytecodePatch;
 
 # direct methods
 .method static constructor <clinit>()V
     .locals 6
 
-    # 1. Erzeuge manifestPatch (ResourcePatch, name = null)
-    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ManifestBuilder;
-    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ManifestBuilder;-><init>()V
+    # 1. Erzeuge providerManifestPatch (ResourcePatch)
+    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderManifestBuilder;
+    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderManifestBuilder;-><init>()V
     const/4 v0, 0x0
     const/4 v1, 0x0
     const/4 v2, 0x1
@@ -20,31 +22,67 @@
     const/4 v5, 0x0
     invoke-static/range {v0 .. v5}, Lapp/morphe/patcher/patch/PatchKt;->resourcePatch$default(Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/morphe/patcher/patch/ResourcePatch;
     move-result-object v0
-    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->manifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->providerManifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
 
-    # 2. Erzeuge ringconnSyncPatch (BytecodePatch)
-    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;
-    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;-><init>()V
-    const-string v0, "RingConn Health Data Provider & Embedded Sync"
-    const-string v1, "Enables debugging, injects HealthDataProvider and embedded Intervals Direct Dark Dashboard with direct sync."
+    # 2. Erzeuge providerPatch (BytecodePatch: RingConn Health Data Provider)
+    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderBytecodeBuilder;
+    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderBytecodeBuilder;-><init>()V
+    const-string v0, "RingConn Health Data Provider"
+    const-string v1, "Enables debugging, registers HealthDataProvider in AndroidManifest.xml and injects local database access for companion apps."
     const/4 v2, 0x1
     const/4 v4, 0x0
     const/4 v5, 0x0
     invoke-static/range {v0 .. v5}, Lapp/morphe/patcher/patch/PatchKt;->bytecodePatch$default(Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/morphe/patcher/patch/BytecodePatch;
     move-result-object v0
-    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->ringconnSyncPatch:Lapp/morphe/patcher/patch/BytecodePatch;
+    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->providerPatch:Lapp/morphe/patcher/patch/BytecodePatch;
+
+    # 3. Erzeuge dashboardManifestPatch (ResourcePatch)
+    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardManifestBuilder;
+    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardManifestBuilder;-><init>()V
+    const/4 v0, 0x0
+    const/4 v1, 0x0
+    const/4 v2, 0x1
+    const/4 v4, 0x3
+    const/4 v5, 0x0
+    invoke-static/range {v0 .. v5}, Lapp/morphe/patcher/patch/PatchKt;->resourcePatch$default(Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/morphe/patcher/patch/ResourcePatch;
+    move-result-object v0
+    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->dashboardManifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+
+    # 4. Erzeuge dashboardPatch (BytecodePatch: Embedded Intervals Direct Dashboard)
+    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardBytecodeBuilder;
+    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardBytecodeBuilder;-><init>()V
+    const-string v0, "Embedded Intervals Direct Dashboard"
+    const-string v1, "Injects embedded Intervals Direct Dark Dashboard with floating action button and direct sync to intervals.icu."
+    const/4 v2, 0x1
+    const/4 v4, 0x0
+    const/4 v5, 0x0
+    invoke-static/range {v0 .. v5}, Lapp/morphe/patcher/patch/PatchKt;->bytecodePatch$default(Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/morphe/patcher/patch/BytecodePatch;
+    move-result-object v0
+    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->dashboardPatch:Lapp/morphe/patcher/patch/BytecodePatch;
 
     return-void
 .end method
 
-.method public static final getRingconnSyncPatch()Lapp/morphe/patcher/patch/BytecodePatch;
+.method public static final getProviderManifestPatch()Lapp/morphe/patcher/patch/ResourcePatch;
     .locals 1
-    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->ringconnSyncPatch:Lapp/morphe/patcher/patch/BytecodePatch;
+    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->providerManifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
     return-object v0
 .end method
 
-.method public static final getManifestPatch()Lapp/morphe/patcher/patch/ResourcePatch;
+.method public static final getProviderPatch()Lapp/morphe/patcher/patch/BytecodePatch;
     .locals 1
-    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->manifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->providerPatch:Lapp/morphe/patcher/patch/BytecodePatch;
+    return-object v0
+.end method
+
+.method public static final getDashboardManifestPatch()Lapp/morphe/patcher/patch/ResourcePatch;
+    .locals 1
+    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->dashboardManifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+    return-object v0
+.end method
+
+.method public static final getDashboardPatch()Lapp/morphe/patcher/patch/BytecodePatch;
+    .locals 1
+    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->dashboardPatch:Lapp/morphe/patcher/patch/BytecodePatch;
     return-object v0
 .end method

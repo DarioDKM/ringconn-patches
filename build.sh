@@ -61,8 +61,8 @@ cp "$PAYLOAD_DEX" "$MPP_STAGING/extensions/HealthDataProvider.dex"
 cat << 'MF_EOF' > "$MPP_STAGING/META-INF/MANIFEST.MF"
 Manifest-Version: 1.0
 Name: RingConn Patches
-Description: Morphe patch for RingConn to support Intervals Direct with Embedded UI and Dev Provider
-Version: 1.1.0
+Description: Morphe patches for RingConn: Health Data Provider & Embedded Intervals Direct Dashboard
+Version: 1.2.0
 Timestamp: 1788710000000
 Source: https://github.com/DarioDKM/ringconn-patches
 Author: DarioDKM
@@ -72,9 +72,10 @@ Patcher-Version: 1.10.0
 
 MF_EOF
 
-(cd "$MPP_STAGING" && zip -q -r "$DIST_DIR/patches-1.1.0.mpp" classes.dex extensions META-INF)
-cp "$DIST_DIR/patches-1.1.0.mpp" "$DIST_DIR/patches-1.0.0.mpp"
+(cd "$MPP_STAGING" && zip -q -r "$DIST_DIR/patches-1.2.0.mpp" classes.dex extensions META-INF)
+cp "$DIST_DIR/patches-1.2.0.mpp" "$DIST_DIR/patches-1.1.0.mpp"
+cp "$DIST_DIR/patches-1.2.0.mpp" "$DIST_DIR/patches-1.0.0.mpp"
 
-echo "==> Done! Output bundle: $DIST_DIR/patches-1.1.0.mpp"
-ls -lh "$DIST_DIR/patches-1.1.0.mpp"
+echo "==> Done! Output bundle: $DIST_DIR/patches-1.2.0.mpp"
+ls -lh "$DIST_DIR/patches-1.2.0.mpp"
 

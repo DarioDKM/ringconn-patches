@@ -1,24 +1,25 @@
-# RingConn Morphe Patch
+# RingConn Morphe Patch Bundle
 
-Official Morphe patch bundle for the **RingConn** Android application (`com.gdjztech.ringconn`), featuring an embedded **Intervals Direct** dashboard and local sync engine for [intervals.icu](https://intervals.icu), while preserving the debug provider for companion tools.
+Official Morphe patch bundle for the **RingConn** Android application (`com.gdjztech.ringconn`), featuring an embedded **Intervals Direct** dashboard, sports science calibrated sleep scoring, local sync to [intervals.icu](https://intervals.icu), and standalone debug provider support for companion tools.
 
 ---
 
-## What Does This Patch Do?
+## Patches in this Bundle
 
-The official RingConn app stores biometric readings (sleep staging, overnight resting heart rate, and skin temperature offset) in a local encrypted SQLite database (`ring_conn.db`).
+This repository provides two modular patches that can be toggled independently in Morphe Manager:
 
-This Morphe patch enriches RingConn with two modes of operation:
+### 1. RingConn Health Data Provider (`ringconn-provider`)
+* **Developer & Companion App Support:** Injects and registers `com.gdjztech.ringconn.provider.HealthDataProvider` with authority `com.gdjztech.ringconn.debug.provider`.
+* Sets `android:debuggable="true"` in `AndroidManifest.xml` so external companion tools such as [Intervals Direct](https://github.com/DarioDKM/IntervalsDirect) can query sleep stages, resting HR, and temperature offset via ContentResolver.
+* Lightweight: no UI elements, zero overhead.
 
-1. **Embedded Intervals Direct UI & Direct Sync:**
-   * Injects a floating action button into the RingConn main screen and adds a standalone launcher shortcut.
-   * Provides an offline hardware-accelerated dark dashboard showing sleep score, total sleep, staging breakdown (Deep, Light, REM, Awake), resting heart rate, HRV, and skin temperature offset.
-   * Direct synchronization to intervals.icu via API key and athlete ID without needing external companion apps.
-   * 30-day sleep history with manual sync buttons.
-
-2. **Developer & Companion App Support:**
-   * Registers `com.gdjztech.ringconn.provider.HealthDataProvider` with authority `com.gdjztech.ringconn.debug.provider`.
-   * Enables `android:debuggable="true"` so external companion tools such as [Intervals Direct](https://github.com/DarioDKM/IntervalsDirect) can query data locally via ContentResolver.
+### 2. Embedded Intervals Direct Dashboard (`ringconn-dashboard`)
+* **Floating Action Button & Standalone Shortcut:** Injects an unobtrusive floating button into the RingConn main screen and provides a dedicated app launcher shortcut.
+* **OLED Dark Dashboard:** Complete English UI with deep `#070A11` background, stage percentages (`%` and minutes), efficiency rating, and 30-day sleep history.
+* **Dual Sleep Score Engine:**
+  * **Athletic (Recommended):** Non-linear sports recovery algorithm calibrated for endurance athletes. Prevents the common commercial inflation of short sleep durations by weighting sleep duration ($T^{2.2}$), slow-wave deep sleep ($D^{1.5}$), REM ($R^{1.5}$), and wake-after-sleep-onset (WASO).
+  * **RingConn Official:** Direct export of the vendor's internal sleep score.
+* **Direct Intervals.icu Sync:** Background auto-sync and manual 30-day sync directly from RingConn without requiring companion apps or external servers.
 
 ---
 
@@ -44,15 +45,35 @@ You do not need a computer, terminal, ADB, or root access. Everything runs direc
 
 1. In Morphe Manager, switch to the **Dashboard / Patcher** tab.
 2. Tap **Select an application** and choose **RingConn** (installed or from an APK file).
-3. Verify that the **RingConn Health Data Provider & Embedded Sync** patch is selected.
+3. Select your desired patches:
+   * Select both **RingConn Health Data Provider** and **Embedded Intervals Direct Dashboard** for the full experience.
+   * Or select only **RingConn Health Data Provider** if you only want to use external companion apps.
 4. Tap **Patch**. Morphe will unpack, patch, and repack the APK.
 5. Tap **Install** to install the patched RingConn app.
 
 ---
 
+## Sleep Score Algorithm: Athletic vs. Official
+
+Commercial trackers often assign high scores (e.g. 80–85) to severely restricted sleep (under 6.5 hours) if fragmentation is low. For endurance athletes, recovery and glycogen replenishment require sufficient absolute duration and deep sleep phases.
+
+The **Athletic Score** evaluates:
+$$\text{Score} = \text{Duration} (40\,\text{pts}) + \text{Deep Sleep} (25\,\text{pts}) + \text{REM} (20\,\text{pts}) + \text{Efficiency} (15\,\text{pts})$$
+
+* **Duration:** Scaled exponentially against 8 hours: $(\text{Duration}/480)^{2.2} \times 40$.
+* **Deep Sleep:** Target 90 minutes of slow-wave sleep: $(\text{Deep}/90)^{1.5} \times 25$.
+* **REM:** Target 100 minutes: $(\text{REM}/100)^{1.5} \times 20$.
+* **Efficiency & WASO:** Punishes wakefulness after sleep onset exceeding 20 minutes.
+
+*Example (06.09.2026, 6h 13m sleep, 40m Deep, 85m REM, 17m Awake):*
+* RingConn Official Score: **84**
+* Athletic Calibrated Score: **60**
+
+---
+
 ## Building From Source
 
-To build `patches-1.1.0.mpp` locally:
+To build `patches-1.2.0.mpp` locally:
 
 ```bash
 git clone https://github.com/DarioDKM/ringconn-patches.git
@@ -60,11 +81,10 @@ cd ringconn-patches
 ./build.sh
 ```
 
-Output bundle will be located at `dist/patches-1.1.0.mpp`.
+Output bundle will be located at `dist/patches-1.2.0.mpp`.
 
 ---
 
 ## License
 
 Released under the [MIT License](LICENSE).
-

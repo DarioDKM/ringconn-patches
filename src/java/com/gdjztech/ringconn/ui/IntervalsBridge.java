@@ -18,8 +18,13 @@ public class IntervalsBridge {
     }
 
     @JavascriptInterface
+    public void saveSettings(String athleteId, String apiKey, boolean autoSync, String scoreSource) {
+        IntervalsSyncEngine.saveSettings(activity, athleteId, apiKey, autoSync, scoreSource);
+    }
+
+    @JavascriptInterface
     public void saveSettings(String athleteId, String apiKey, boolean autoSync) {
-        IntervalsSyncEngine.saveSettings(activity, athleteId, apiKey, autoSync);
+        IntervalsSyncEngine.saveSettings(activity, athleteId, apiKey, autoSync, "athletic");
     }
 
     @JavascriptInterface

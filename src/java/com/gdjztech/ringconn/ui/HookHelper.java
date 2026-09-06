@@ -15,6 +15,15 @@ import android.widget.TextView;
 public class HookHelper {
     public static void attachFloatingButton(final Activity activity) {
         if (activity == null) return;
+        try {
+            Intent testIntent = new Intent(activity, IntervalsActivity.class);
+            if (activity.getPackageManager().resolveActivity(testIntent, 0) == null) {
+                return;
+            }
+        } catch (Exception ignored) {
+            return;
+        }
+
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
