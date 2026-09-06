@@ -1,54 +1,50 @@
-.class public final Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ExtensionSupplier;
+.class public final Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;
 .super Ljava/lang/Object;
 .source "RingConnSyncPatch.kt"
 
-# interfaces
-.implements Ljava/util/function/Supplier;
-
-# instance fields
-.field private final classLoader:Ljava/lang/ClassLoader;
-.field private final extension:Ljava/lang/String;
+# static fields
+.field private static final ringconnSyncPatch:Lapp/morphe/patcher/patch/BytecodePatch;
+.field private static final manifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
 
 # direct methods
-.method public constructor <init>(Ljava/lang/ClassLoader;Ljava/lang/String;)V
-    .locals 0
-    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
-    iput-object p1, p0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ExtensionSupplier;->classLoader:Ljava/lang/ClassLoader;
-    iput-object p2, p0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ExtensionSupplier;->extension:Ljava/lang/String;
+.method static constructor <clinit>()V
+    .locals 6
+
+    # 1. Erzeuge manifestPatch (ResourcePatch, name = null)
+    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ManifestBuilder;
+    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ManifestBuilder;-><init>()V
+    const/4 v0, 0x0
+    const/4 v1, 0x0
+    const/4 v2, 0x1
+    const/4 v4, 0x3
+    const/4 v5, 0x0
+    invoke-static/range {v0 .. v5}, Lapp/morphe/patcher/patch/PatchKt;->resourcePatch$default(Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/morphe/patcher/patch/ResourcePatch;
+    move-result-object v0
+    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->manifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
+
+    # 2. Erzeuge ringconnSyncPatch (BytecodePatch)
+    new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;
+    invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$BytecodeBuilder;-><init>()V
+    const-string v0, "RingConn Health Data Provider"
+    const-string v1, "Enables debugging, injects HealthDataProvider and exposes raw ring_conn.db tables for Intervals Direct."
+    const/4 v2, 0x1
+    const/4 v4, 0x0
+    const/4 v5, 0x0
+    invoke-static/range {v0 .. v5}, Lapp/morphe/patcher/patch/PatchKt;->bytecodePatch$default(Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/morphe/patcher/patch/BytecodePatch;
+    move-result-object v0
+    sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->ringconnSyncPatch:Lapp/morphe/patcher/patch/BytecodePatch;
+
     return-void
 .end method
 
-# virtual methods
-.method public final get()Ljava/io/InputStream;
-    .locals 3
-
-    iget-object v0, p0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ExtensionSupplier;->classLoader:Ljava/lang/ClassLoader;
-    iget-object v1, p0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ExtensionSupplier;->extension:Ljava/lang/String;
-    invoke-virtual {v0, v1}, Ljava/lang/ClassLoader;->getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;
-    move-result-object v0
-
-    if-eqz v0, :cond_0
+.method public static final getRingconnSyncPatch()Lapp/morphe/patcher/patch/BytecodePatch;
+    .locals 1
+    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->ringconnSyncPatch:Lapp/morphe/patcher/patch/BytecodePatch;
     return-object v0
-
-    :cond_0
-    new-instance v0, Lapp/morphe/patcher/patch/PatchException;
-    new-instance v1, Ljava/lang/StringBuilder;
-    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
-    const-string v2, "Extension \""
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    iget-object v2, p0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ExtensionSupplier;->extension:Ljava/lang/String;
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    const-string v2, "\" not found"
-    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-    move-result-object v1
-    invoke-direct {v0, v1}, Lapp/morphe/patcher/patch/PatchException;-><init>(Ljava/lang/String;)V
-    throw v0
 .end method
 
-.method public bridge synthetic get()Ljava/lang/Object;
+.method public static final getManifestPatch()Lapp/morphe/patcher/patch/ResourcePatch;
     .locals 1
-    invoke-virtual {p0}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ExtensionSupplier;->get()Ljava/io/InputStream;
-    move-result-object v0
+    sget-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->manifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
     return-object v0
 .end method
