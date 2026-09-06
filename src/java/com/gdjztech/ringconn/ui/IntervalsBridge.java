@@ -44,6 +44,11 @@ public class IntervalsBridge {
     }
 
     @JavascriptInterface
+    public String exportLocalBackup() {
+        return IntervalsSyncEngine.exportLocalBackup(activity);
+    }
+
+    @JavascriptInterface
     public void close() {
         activity.runOnUiThread(new Runnable() {
             @Override

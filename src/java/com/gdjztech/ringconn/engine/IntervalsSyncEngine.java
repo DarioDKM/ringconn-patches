@@ -432,4 +432,141 @@ public class IntervalsSyncEngine {
 
         return result;
     }
+
+    public static String exportLocalBackup(Context context) {
+        if (context == null) return "Context is null";
+        SQLiteDatabase db = getDatabase(context);
+        if (db == null) return "Database ring_conn.db not available";
+
+        Cursor cursor = null;
+        try {
+            cursor = db.query("SleepSyncModel", null, null, null, null, null, "dateSleep DESC", "180");
+            if (cursor == null || cursor.getCount() == 0) {
+                return "No sleep records to export";
+            }
+
+            JSONArray jsonArray = new JSONArray();
+            StringBuilder csv = new StringBuilder();
+            csv.append("Date,Sleep_Hours,Sleep_Score_Athletic,Sleep_Score_RingConn,Deep_Min,REM_Min,Light_Min,Awake_Min,Resting_HR,HR_Avg,HRV_rMSSD,Respiration,Skin_Temp_Offset\n");
+
+            int colDate = cursor.getColumnIndex("dateSleep");
+            int colRestingHr = cursor.getColumnIndex("restingHr");
+            int colHrAvg = cursor.getColumnIndex("hrAvg");
+            int colHrvAvg = cursor.getColumnIndex("hrvAvg");
+            int colRrAvg = cursor.getColumnIndex("rrAvg");
+            int colTempOffset = cursor.getColumnIndex("tempOffset");
+            int colDeep = cursor.getColumnIndex("deepDuration");
+            int colRem = cursor.getColumnIndex("remDuration");
+            int colLight = cursor.getColumnIndex("lightDuration");
+            int colAwake = cursor.getColumnIndex("awakeDuration");
+            int colSleepDur = cursor.getColumnIndex("sleepDuration");
+            int colScore = cursor.getColumnIndex("sleepScore");
+            int colSpo2 = cursor.getColumnIndex("spo2Avg");
+
+            while (cursor.moveToNext()) {
+                String date = colDate >= 0 ? cursor.getString(colDate) : "";
+                int deepM = colDeep >= 0 ? (int) cursor.getFloat(colDeep) : 0;
+                int remM = colRem >= 0 ? (int) cursor.getFloat(colRem) : 0;
+                int lightM = colLight >= 0 ? (int) cursor.getFloat(colLight) : 0;
+                int awakeM = colAwake >= 0 ? (int) cursor.getFloat(colAwake) : 0;
+                int sleepM = colSleepDur >= 0 ? (int) cursor.getFloat(colSleepDur) : (deepM + remM + lightM);
+                int officialScore = colScore >= 0 ? (int) cursor.getFloat(colScore) : 0;
+                int athleticScore = calculateAthleticSleepScore(sleepM, deepM, remM, awakeM);
+                Integer rhr = (colRestingHr >= 0 && !cursor.isNull(colRestingHr)) ? cursor.getInt(colRestingHr) : null;
+                Integer hrAvg = (colHrAvg >= 0 && !cursor.isNull(colHrAvg)) ? (int) cursor.getFloat(colHrAvg) : null;
+                Float hrv = (colHrvAvg >= 0 && !cursor.isNull(colHrvAvg)) ? Math.round(cursor.getFloat(colHrvAvg) * 10.0f) / 10.0f : null;
+                Float rr = null;
+                if (colRrAvg >= 0 && !cursor.isNull(colRrAvg)) {
+                    float rawRr = cursor.getFloat(colRrAvg);
+                    if (rawRr > 0) rr = Math.round((rawRr / 8.0f) * 10.0f) / 10.0f;
+                }
+                Float tempOffset = (colTempOffset >= 0 && !cursor.isNull(colTempOffset)) ? Math.round(cursor.getFloat(colTempOffset) * 100.0f) / 100.0f : null;
+                Float spo2 = (colSpo2 >= 0 && !cursor.isNull(colSpo2)) ? cursor.getFloat(colSpo2) : null;
+
+                JSONObject item = new JSONObject();
+                item.put("date", date);
+                item.put("sleepDurationMin", sleepM);
+                item.put("sleepScoreAthletic", athleticScore);
+                item.put("sleepScoreOfficial", officialScore);
+                item.put("deepMin", deepM);
+                item.put("remMin", remM);
+                item.put("lightMin", lightM);
+                item.put("awakeMin", awakeM);
+                if (rhr != null) item.put("restingHr", rhr);
+                if (hrAvg != null) item.put("hrAvg", hrAvg);
+                if (hrv != null) item.put("hrv", hrv);
+                if (rr != null) item.put("respiration", rr);
+                if (tempOffset != null) item.put("tempOffset", tempOffset);
+                if (spo2 != null) item.put("spo2", spo2);
+                jsonArray.put(item);
+
+                String sleepHours = String.format(Locale.US, "%.2f", sleepM / 60.0);
+                csv.append(date).append(",")
+                   .append(sleepHours).append(",")
+                   .append(athleticScore).append(",")
+                   .append(officialScore).append(",")
+                   .append(deepM).append(",")
+                   .append(remM).append(",")
+                   .append(lightM).append(",")
+                   .append(awakeM).append(",")
+                   .append(rhr != null ? rhr : "").append(",")
+                   .append(hrAvg != null ? hrAvg : "").append(",")
+                   .append(hrv != null ? hrv : "").append(",")
+                   .append(rr != null ? rr : "").append(",")
+                   .append(tempOffset != null ? tempOffset : "").append("\n");
+            }
+
+            int count = jsonArray.length();
+            writeExportFile(context, "RingConn_Wellness_Master.json", "application/json", jsonArray.toString(2));
+            writeExportFile(context, "RingConn_Wellness_Master.csv", "text/csv", csv.toString());
+
+            String msg = "Exported " + count + " days to Download/IntervalsDirect";
+            appendLog(context, msg);
+            return msg;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Export failed: " + e.getMessage();
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+    }
+
+    private static void writeExportFile(Context context, String fileName, String mimeType, String content) {
+        try {
+            byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                android.content.ContentValues values = new android.content.ContentValues();
+                values.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+                values.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, mimeType);
+                values.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS + "/IntervalsDirect");
+
+                try {
+                    android.net.Uri queryUri = android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+                    String selection = android.provider.MediaStore.MediaColumns.DISPLAY_NAME + "=?";
+                    context.getContentResolver().delete(queryUri, selection, new String[]{fileName});
+                } catch (Exception ignored) {}
+
+                android.net.Uri uri = context.getContentResolver().insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                if (uri != null) {
+                    try (OutputStream os = context.getContentResolver().openOutputStream(uri)) {
+                        if (os != null) {
+                            os.write(bytes);
+                            os.flush();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            File dir = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "IntervalsDirect");
+            if (!dir.exists()) dir.mkdirs();
+            File file = new File(dir, fileName);
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                fos.write(bytes);
+                fos.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

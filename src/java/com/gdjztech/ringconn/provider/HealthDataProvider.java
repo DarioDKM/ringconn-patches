@@ -9,8 +9,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import com.gdjztech.ringconn.engine.IntervalsSyncEngine;
 import com.gdjztech.ringconn.ui.HookHelper;
 import java.io.File;
+import java.util.ArrayList;
 
 public class HealthDataProvider extends ContentProvider {
     private SQLiteDatabase db;
@@ -68,20 +70,73 @@ public class HealthDataProvider extends ContentProvider {
         if (database == null) return null;
         String path = uri.getPath();
         if (path == null) path = "";
-        String table;
-        if (path.contains("daily")) {
-            table = "DailyModel";
-        } else if (path.contains("temp")) {
-            table = "TempOffsetModel";
-        } else {
-            table = "SleepSyncModel";
+        String last = uri.getLastPathSegment();
+
+        String table = "SleepSyncModel";
+        if (last != null && !last.isEmpty()) {
+            if ("sleep".equalsIgnoreCase(last) || last.contains("SleepSyncModel")) {
+                table = "SleepSyncModel";
+            } else if ("daily".equalsIgnoreCase(last) || last.contains("DailyModel")) {
+                table = "DailyModel";
+            } else if ("temp".equalsIgnoreCase(last) || last.contains("TempOffsetModel")) {
+                table = "TempOffsetModel";
+            } else if ("history_hr".equalsIgnoreCase(last) || last.contains("HistoryHrModel")) {
+                table = "HistoryHrModel";
+            } else {
+                table = last; // Direct table name (e.g. sqlite_master or any table)
+            }
         }
+
         try {
             return database.query(table, projection, selection, selectionArgs, null, null, sortOrder);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+        Bundle result = new Bundle();
+        SQLiteDatabase database = getDb();
+        if (database == null) {
+            result.putBoolean("success", false);
+            result.putString("error", "Database not opened");
+            return result;
+        }
+
+        try {
+            if ("getTables".equalsIgnoreCase(method)) {
+                ArrayList<String> tables = new ArrayList<>();
+                Cursor c = database.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+                if (c != null) {
+                    while (c.moveToNext()) {
+                        tables.add(c.getString(0));
+                    }
+                    c.close();
+                }
+                result.putStringArrayList("tables", tables);
+                result.putBoolean("success", true);
+                return result;
+            } else if ("exportBackup".equalsIgnoreCase(method)) {
+                String status = IntervalsSyncEngine.exportLocalBackup(getContext());
+                result.putString("status", status);
+                result.putBoolean("success", true);
+                return result;
+            } else if ("rawQuery".equalsIgnoreCase(method) && arg != null) {
+                Cursor c = database.rawQuery(arg, null);
+                if (c != null) {
+                    result.putInt("rowCount", c.getCount());
+                    c.close();
+                }
+                result.putBoolean("success", true);
+                return result;
+            }
+        } catch (Exception e) {
+            result.putBoolean("success", false);
+            result.putString("error", e.getMessage());
+        }
+        return result;
     }
 
     @Override
