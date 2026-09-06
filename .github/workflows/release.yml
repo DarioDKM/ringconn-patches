@@ -31,11 +31,18 @@ jobs:
           chmod +x build.sh
           ./build.sh
 
+      - name: Upload MPP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphe-patches
+          path: dist/*.mpp
+
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/patches-1.0.0.mpp
+          files: |
+            dist/*.mpp
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

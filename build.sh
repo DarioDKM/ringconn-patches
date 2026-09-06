@@ -9,25 +9,56 @@ JAVA_SRC_DIR="$SCRIPT_DIR/src/java"
 DEX_DIR="$SCRIPT_DIR/dex"
 PAYLOAD_DEX="$DEX_DIR/HealthDataProvider.dex"
 
-ANDROID_JAR="/opt/homebrew/share/android-commandlinetools/platforms/android-34/android.jar"
-D8="/opt/homebrew/share/android-commandlinetools/build-tools/35.0.0/d8"
+# Auto-detect Android SDK (macOS Homebrew, macOS Android Studio, or Ubuntu / GitHub Actions runner)
+if [ -z "${ANDROID_HOME:-}" ]; then
+    if [ -d "/usr/local/lib/android/sdk" ]; then
+        ANDROID_HOME="/usr/local/lib/android/sdk"
+    elif [ -d "$HOME/Library/Android/sdk" ]; then
+        ANDROID_HOME="$HOME/Library/Android/sdk"
+    elif [ -d "/opt/homebrew/share/android-commandlinetools" ]; then
+        ANDROID_HOME="/opt/homebrew/share/android-commandlinetools"
+    fi
+fi
+
+ANDROID_JAR=""
+if [ -n "${ANDROID_HOME:-}" ] && [ -d "$ANDROID_HOME/platforms" ]; then
+    ANDROID_JAR=$(find "$ANDROID_HOME/platforms" -name "android.jar" 2>/dev/null | sort -V | tail -n 1 || true)
+fi
+if [ -z "$ANDROID_JAR" ] || [ ! -f "$ANDROID_JAR" ]; then
+    ANDROID_JAR=$(find /opt/homebrew /usr/local /usr/lib "$HOME" -name "android.jar" 2>/dev/null | sort -V | tail -n 1 || true)
+fi
+
+D8=""
+if [ -n "${ANDROID_HOME:-}" ] && [ -d "$ANDROID_HOME/build-tools" ]; then
+    D8=$(find "$ANDROID_HOME/build-tools" -name "d8" 2>/dev/null | sort -V | tail -n 1 || true)
+fi
+if [ -z "$D8" ] || [ ! -x "$D8" ]; then
+    D8=$(command -v d8 2>/dev/null || find /opt/homebrew /usr/local "$HOME" -name "d8" 2>/dev/null | sort -V | tail -n 1 || true)
+fi
 
 mkdir -p "$BUILD_DIR"
 mkdir -p "$DIST_DIR"
 mkdir -p "$DEX_DIR"
 
-echo "==> 1. Compiling Java sources (Provider, Activity, WebView Bridge, Sync Engine)..."
-BIN_DIR="$BUILD_DIR/bin"
-rm -rf "$BIN_DIR"
-mkdir -p "$BIN_DIR"
+if [ -n "$ANDROID_JAR" ] && [ -f "$ANDROID_JAR" ] && [ -n "$D8" ] && [ -x "$D8" ]; then
+    echo "==> 1. Compiling Java sources with android.jar ($ANDROID_JAR)..."
+    BIN_DIR="$BUILD_DIR/bin"
+    rm -rf "$BIN_DIR"
+    mkdir -p "$BIN_DIR"
 
-javac -cp "$ANDROID_JAR" -source 1.8 -target 1.8 -d "$BIN_DIR" \
-    $(find "$JAVA_SRC_DIR" -name "*.java")
+    javac -cp "$ANDROID_JAR" -source 1.8 -target 1.8 -Xlint:-options -d "$BIN_DIR" \
+        $(find "$JAVA_SRC_DIR" -name "*.java")
 
-echo "==> 2. Converting class files to DEX with d8..."
-rm -f "$PAYLOAD_DEX"
-find "$BIN_DIR" -name "*.class" | xargs "$D8" --min-api 26 --output "$DEX_DIR"
-mv "$DEX_DIR/classes.dex" "$PAYLOAD_DEX"
+    echo "==> 2. Converting class files to DEX with d8 ($D8)..."
+    rm -f "$PAYLOAD_DEX"
+    find "$BIN_DIR" -name "*.class" | xargs "$D8" --min-api 26 --output "$DEX_DIR"
+    mv "$DEX_DIR/classes.dex" "$PAYLOAD_DEX"
+elif [ -f "$PAYLOAD_DEX" ]; then
+    echo "==> Notice: Android SDK not found, using pre-compiled payload DEX at $PAYLOAD_DEX"
+else
+    echo "ERROR: Neither Android SDK (android.jar + d8) nor pre-compiled $PAYLOAD_DEX found!" >&2
+    exit 1
+fi
 
 echo "==> 3. Compiling patch smali to classes.dex with apktool..."
 TMP_APKTOOL_DIR="$BUILD_DIR/apktool_workspace"
