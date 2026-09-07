@@ -9,7 +9,7 @@ Official Morphe patch bundle for the **RingConn** Android application (`com.gdjz
 This repository provides two modular patches that can be toggled independently in Morphe Manager:
 
 ### 1. RingConn Health Data Provider (`ringconn-provider`)
-* **Developer & Companion App Support:** Injects and registers `com.gdjztech.ringconn.provider.HealthDataProvider` with authority `com.gdjztech.ringconn.debug.provider`.
+* **Developer & Companion App Support:** Injects and registers `com.gdjztech.ringconn.provider.HealthDataProvider` with authority `com.gdjztech.ringconn.provider`.
 * Sets `android:debuggable="true"` in `AndroidManifest.xml` so external companion tools such as [Intervals Direct](https://github.com/DarioDKM/IntervalsDirect) can query sleep stages, resting HR, and temperature offset via ContentResolver.
 * Lightweight: no UI elements, zero overhead.
 
@@ -73,7 +73,7 @@ $$\text{Score} = \text{Duration} (40\,\text{pts}) + \text{Deep Sleep} (25\,\text
 
 ## Building From Source
 
-To build `patches-1.2.0.mpp` locally:
+To build `patches-1.2.1.mpp` locally:
 
 ```bash
 git clone https://github.com/DarioDKM/ringconn-patches.git
@@ -81,7 +81,7 @@ cd ringconn-patches
 ./build.sh
 ```
 
-Output bundle will be located at `dist/patches-1.2.0.mpp`.
+Output bundle will be located at `dist/patches-1.2.1.mpp`.
 
 ---
 
