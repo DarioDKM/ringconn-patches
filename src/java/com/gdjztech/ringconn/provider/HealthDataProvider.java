@@ -29,6 +29,7 @@ public class HealthDataProvider extends ContentProvider {
                         public void onActivityResumed(Activity activity) {
                             if (activity != null && !activity.getClass().getName().contains("IntervalsActivity")) {
                                 HookHelper.attachFloatingButton(activity);
+                                checkAutoSync(activity);
                             }
                         }
 
@@ -47,21 +48,29 @@ public class HealthDataProvider extends ContentProvider {
         return true;
     }
 
-    private synchronized SQLiteDatabase getDb() {
-        if (db != null && db.isOpen()) {
-            return db;
+    private static SQLiteDatabase sDb;
+
+    public static synchronized SQLiteDatabase getDbInstance(Context context) {
+        if (sDb != null && sDb.isOpen()) {
+            return sDb;
         }
-        Context ctx = getContext();
-        if (ctx == null) return null;
+        if (context == null) return null;
         try {
-            File dbFile = ctx.getDatabasePath("ring_conn.db");
+            File dbFile = context.getDatabasePath("ring_conn.db");
             if (dbFile != null && dbFile.exists()) {
-                db = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
+                sDb = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READWRITE);
+                try {
+                    sDb.execSQL("PRAGMA busy_timeout = 5000;");
+                } catch (Exception ignored) {}
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return db;
+        return sDb;
+    }
+
+    private SQLiteDatabase getDb() {
+        return getDbInstance(getContext());
     }
 
     @Override
@@ -152,6 +161,51 @@ public class HealthDataProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    private static long sLastAutoSyncCheck = 0;
+
+    private static void checkAutoSync(final Context context) {
+        if (context == null) return;
+        long now = System.currentTimeMillis();
+        if (now - sLastAutoSyncCheck < 10 * 60 * 1000) return; // at most once every 10 min
+        sLastAutoSyncCheck = now;
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    android.content.SharedPreferences prefs = IntervalsSyncEngine.getPrefs(context);
+                    boolean autoSync = prefs.getBoolean(IntervalsSyncEngine.KEY_AUTO_SYNC, true);
+                    if (!autoSync) return;
+
+                    long lastSync = prefs.getLong(IntervalsSyncEngine.KEY_LAST_SYNC_TIME, 0);
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+                    String todayStr = sdf.format(new java.util.Date());
+                    String lastSyncStr = lastSync > 0 ? sdf.format(new java.util.Date(lastSync)) : "";
+
+                    if (!todayStr.equals(lastSyncStr) || (System.currentTimeMillis() - lastSync > 4 * 3600 * 1000)) {
+                        SQLiteDatabase database = getDbInstance(context);
+                        if (database != null) {
+                            Cursor c = null;
+                            try {
+                                c = database.rawQuery("SELECT dateSleep FROM SleepSyncModel ORDER BY dateSleep DESC LIMIT 1", null);
+                                if (c != null && c.moveToFirst()) {
+                                    String latestDate = c.getString(0);
+                                    if (latestDate != null && !latestDate.isEmpty()) {
+                                        IntervalsSyncEngine.syncDate(context, latestDate);
+                                    }
+                                }
+                            } finally {
+                                if (c != null) c.close();
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override

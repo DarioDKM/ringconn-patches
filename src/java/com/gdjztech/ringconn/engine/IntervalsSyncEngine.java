@@ -32,15 +32,7 @@ public class IntervalsSyncEngine {
     public static final String KEY_LOGS = "sync_logs";
 
     public static SQLiteDatabase getDatabase(Context context) {
-        try {
-            File dbFile = context.getDatabasePath("ring_conn.db");
-            if (dbFile != null && dbFile.exists()) {
-                return SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return com.gdjztech.ringconn.provider.HealthDataProvider.getDbInstance(context);
     }
 
     public static SharedPreferences getPrefs(Context context) {
@@ -96,8 +88,11 @@ public class IntervalsSyncEngine {
         SharedPreferences prefs = getPrefs(context);
         JSONObject obj = new JSONObject();
         try {
-            obj.put("athleteId", prefs.getString(KEY_ATHLETE_ID, ""));
-            obj.put("apiKey", prefs.getString(KEY_API_KEY, ""));
+            String athleteId = prefs.getString(KEY_ATHLETE_ID, "").trim();
+            String apiKey = prefs.getString(KEY_API_KEY, "").trim();
+
+            obj.put("athleteId", athleteId);
+            obj.put("apiKey", apiKey);
             obj.put("autoSync", prefs.getBoolean(KEY_AUTO_SYNC, true));
             obj.put("scoreSource", prefs.getString(KEY_SCORE_SOURCE, "athletic"));
             obj.put("lastSyncTime", prefs.getLong(KEY_LAST_SYNC_TIME, 0));
