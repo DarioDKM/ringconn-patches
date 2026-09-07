@@ -27,8 +27,8 @@
     # 2. Erzeuge providerPatch (BytecodePatch: RingConn Health Data Provider)
     new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderBytecodeBuilder;
     invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderBytecodeBuilder;-><init>()V
-    const-string v0, "RingConn Health Data Provider"
-    const-string v1, "Enables debugging, registers HealthDataProvider in AndroidManifest.xml and injects local database access for companion apps."
+    const-string v0, "RingConn Health Data Provider (v1.2.4)"
+    const-string v1, "v1.2.4: Aktiviert lokalen SQLite-Zugriff fuer CyclingCoach und Companion-Apps."
     const/4 v2, 0x1
     const/4 v4, 0x0
     const/4 v5, 0x0
@@ -48,11 +48,11 @@
     move-result-object v0
     sput-object v0, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt;->dashboardManifestPatch:Lapp/morphe/patcher/patch/ResourcePatch;
 
-    # 4. Erzeuge dashboardPatch (BytecodePatch: Embedded Intervals Direct Dashboard)
+    # 4. Erzeuge dashboardPatch (BytecodePatch: Intervals.icu Quick-Sync Kachel)
     new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardBytecodeBuilder;
     invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$DashboardBytecodeBuilder;-><init>()V
-    const-string v0, "Embedded Intervals Direct Dashboard"
-    const-string v1, "Injects embedded Intervals Direct Dark Dashboard with floating action button and direct sync to intervals.icu."
+    const-string v0, "Intervals.icu Quick-Sync Kachel (v1.2.4)"
+    const-string v1, "v1.2.4: Ultra-schlanke RingConn-Kachel im Discover-Tab fuer 1-Klick-Sync zu Intervals.icu (ohne Radsport-Metriken)."
     const/4 v2, 0x1
     const/4 v4, 0x0
     const/4 v5, 0x0

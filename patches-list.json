@@ -1,9 +1,9 @@
 {
-  "version": "1.2.3",
+  "version": "1.2.4",
   "patches": [
     {
-      "name": "RingConn Health Data Provider",
-      "description": "Enables debugging, registers HealthDataProvider in AndroidManifest.xml, and exposes raw biometric database tables for companion apps.",
+      "name": "RingConn Health Data Provider (v1.2.4)",
+      "description": "v1.2.4: Aktiviert lokalen SQLite-Zugriff für CyclingCoach und Companion-Apps.",
       "default": true,
       "dependencies": [],
       "compatiblePackages": [
@@ -28,11 +28,11 @@
       "options": []
     },
     {
-      "name": "Embedded Intervals Direct Dashboard",
-      "description": "Injects an embedded OLED-Dark Dashboard, draggable floating action button, and direct sync engine to intervals.icu directly inside RingConn.",
+      "name": "Intervals.icu Quick-Sync Kachel (v1.2.4)",
+      "description": "v1.2.4: Ultra-schlanke RingConn-Kachel im Discover-Tab für 1-Klick-Sync zu Intervals.icu (ohne Radsport-Metriken).",
       "default": true,
       "dependencies": [
-        "RingConn Health Data Provider"
+        "RingConn Health Data Provider (v1.2.4)"
       ],
       "compatiblePackages": [
         {

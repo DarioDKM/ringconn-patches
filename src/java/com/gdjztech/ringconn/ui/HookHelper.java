@@ -214,23 +214,8 @@ public class HookHelper {
 
         card.addView(headerRow);
 
-        // ROW 2: 3-Column Metrics (Fitness CTL / Ermüdung ATL / Form TSB)
-        LinearLayout statsRow = new LinearLayout(activity);
-        statsRow.setOrientation(LinearLayout.HORIZONTAL);
-        LinearLayout.LayoutParams statsParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        statsParams.setMargins(0, dpToPx(activity, 14), 0, 0);
-        statsRow.setLayoutParams(statsParams);
-
-        statsRow.addView(createMetricColumn(activity, "TAG_METRIC_CTL", "68.0", "Fitness (CTL)"));
-        statsRow.addView(createMetricColumn(activity, "TAG_METRIC_ATL", "65.0", "Ermüdung (ATL)"));
-        statsRow.addView(createMetricColumn(activity, "TAG_METRIC_TSB", "+3.0", "Form (TSB)"));
-
-        card.addView(statsRow);
-
-        // ROW 3: Native RingConn White Pill Button ("⚡ Jetzt synchronisieren")
-        TextView btnSync = new TextView(activity);
+        // ROW 2: Native RingConn White Pill Button ("⚡ Jetzt synchronisieren")
+        final TextView btnSync = new TextView(activity);
         btnSync.setText("⚡ Jetzt synchronisieren");
         btnSync.setTextColor(0xFF000000);
         btnSync.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
@@ -253,6 +238,8 @@ public class HookHelper {
             @Override
             public void onClick(View v) {
                 Toast.makeText(activity, "⚡ Übertrage RingConn-Daten zu Intervals.icu...", Toast.LENGTH_SHORT).show();
+                btnSync.setEnabled(false);
+                btnSync.setText("⏳ Übertrage Daten...");
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -263,6 +250,8 @@ public class HookHelper {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                btnSync.setEnabled(true);
+                                btnSync.setText("⚡ Jetzt synchronisieren");
                                 if (ok) {
                                     Toast.makeText(activity, "✅ Intervals.icu erfolgreich synchronisiert!", Toast.LENGTH_LONG).show();
                                     updateCard(card, activity);
@@ -281,44 +270,6 @@ public class HookHelper {
         return card;
     }
 
-    private static LinearLayout createMetricColumn(Context context, String valTag, String initialVal, String label) {
-        LinearLayout col = new LinearLayout(context);
-        col.setOrientation(LinearLayout.VERTICAL);
-        col.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-        params.setMargins(dpToPx(context, 4), 0, dpToPx(context, 4), 0);
-        col.setLayoutParams(params);
-
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xFF242426);
-        bg.setCornerRadius(dpToPx(context, 10));
-        col.setBackground(bg);
-        col.setPadding(dpToPx(context, 6), dpToPx(context, 10), dpToPx(context, 6), dpToPx(context, 10));
-
-        TextView tvVal = new TextView(context);
-        tvVal.setTag(valTag);
-        tvVal.setText(initialVal);
-        tvVal.setTextColor(0xFFFFFFFF);
-        tvVal.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
-        tvVal.setTypeface(Typeface.DEFAULT_BOLD);
-        tvVal.setGravity(Gravity.CENTER);
-        col.addView(tvVal);
-
-        TextView tvLabel = new TextView(context);
-        tvLabel.setText(label);
-        tvLabel.setTextColor(0xFF8E8E93);
-        tvLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-        tvLabel.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams lblParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        lblParams.setMargins(0, dpToPx(context, 4), 0, 0);
-        tvLabel.setLayoutParams(lblParams);
-        col.addView(tvLabel);
-
-        return col;
-    }
-
     public static void updateCard(final View card, final Activity activity) {
         if (card == null || activity == null) return;
         new Thread(new Runnable() {
@@ -326,9 +277,6 @@ public class HookHelper {
             public void run() {
                 try {
                     android.content.SharedPreferences prefs = IntervalsSyncEngine.getPrefs(activity);
-                    final float ctl = prefs.getFloat(IntervalsSyncEngine.KEY_CTL, 68.0f);
-                    final float atl = prefs.getFloat(IntervalsSyncEngine.KEY_ATL, 65.0f);
-                    final float tsb = prefs.getFloat(IntervalsSyncEngine.KEY_TSB, 3.0f);
                     final long lastSyncTime = prefs.getLong(IntervalsSyncEngine.KEY_LAST_SYNC_TIME, 0);
 
                     activity.runOnUiThread(new Runnable() {
@@ -336,34 +284,24 @@ public class HookHelper {
                         public void run() {
                             try {
                                 TextView tvSub = card.findViewWithTag("TAG_SYNC_SUBTITLE");
-                                TextView tvCtl = card.findViewWithTag("TAG_METRIC_CTL");
-                                TextView tvAtl = card.findViewWithTag("TAG_METRIC_ATL");
-                                TextView tvTsb = card.findViewWithTag("TAG_METRIC_TSB");
+                                TextView tvBadge = card.findViewWithTag("TAG_SYNC_BADGE");
 
                                 if (tvSub != null) {
                                     if (lastSyncTime > 0) {
                                         String timeStr = new SimpleDateFormat("dd.MM. HH:mm", Locale.GERMANY).format(new Date(lastSyncTime));
                                         tvSub.setText("Letzter Sync: " + timeStr);
                                     } else {
-                                        tvSub.setText("Noch nicht synchronisiert");
+                                        tvSub.setText("Bereit für Synchronisation");
                                     }
                                 }
 
-                                if (tvCtl != null) {
-                                    tvCtl.setText(String.format(Locale.US, "%.1f", ctl));
-                                }
-                                if (tvAtl != null) {
-                                    tvAtl.setText(String.format(Locale.US, "%.1f", atl));
-                                }
-                                if (tvTsb != null) {
-                                    String sign = tsb > 0 ? "+" : "";
-                                    tvTsb.setText(sign + String.format(Locale.US, "%.1f", tsb));
-                                    if (tsb >= 0) {
-                                        tvTsb.setTextColor(0xFF34C759); // Green
-                                    } else if (tsb >= -25) {
-                                        tvTsb.setTextColor(0xFFFFFFFF); // Normal white
+                                if (tvBadge != null) {
+                                    if (lastSyncTime > 0) {
+                                        tvBadge.setText("● Synced");
+                                        tvBadge.setTextColor(0xFF34C759);
                                     } else {
-                                        tvTsb.setTextColor(0xFFFF3B30); // Alert red
+                                        tvBadge.setText("● Bereit");
+                                        tvBadge.setTextColor(0xFF38BDF8);
                                     }
                                 }
                             } catch (Exception e) {
