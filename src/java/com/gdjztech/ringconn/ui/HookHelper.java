@@ -77,21 +77,22 @@ public class HookHelper {
                     }
 
                     // 3. Build native Discover Coach Card
-                    final LinearLayout card = buildCoachCard(activity);
+                    // 3. Build native Discover Intervals Sync Card
+                    final LinearLayout card = buildSyncCard(activity);
                     card.setTag(TAG_CARD);
                     card.setVisibility(sIsDiscoverTab ? View.VISIBLE : View.GONE);
                     if (sIsDiscoverTab) {
                         updateCard(card, activity);
                     }
 
-                    int marginPx = dpToPx(activity, 14);
-                    int bottomMarginPx = dpToPx(activity, 68); // positioned directly above bottom nav bar
+                    int marginPx = dpToPx(activity, 16);
+                    int topMarginPx = dpToPx(activity, 404); // positioned cleanly below original Sort button
                     FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                     );
-                    params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                    params.setMargins(marginPx, 0, marginPx, bottomMarginPx);
+                    params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+                    params.setMargins(marginPx, topMarginPx, marginPx, 0);
 
                     root.addView(card, params);
 
@@ -135,149 +136,123 @@ public class HookHelper {
         });
     }
 
-    private static LinearLayout buildCoachCard(final Activity activity) {
+    private static LinearLayout buildSyncCard(final Activity activity) {
         LinearLayout card = new LinearLayout(activity);
         card.setOrientation(LinearLayout.VERTICAL);
 
+        // Native RingConn card background: #1B1B1C with 16dp rounded corners
         GradientDrawable cardBg = new GradientDrawable();
-        cardBg.setColor(0xF40D1527); // Dark slate glassmorphism
-        cardBg.setCornerRadius(dpToPx(activity, 18));
-        cardBg.setStroke(dpToPx(activity, 1.5f), 0x4038BDF8); // subtle cyan glow
+        cardBg.setColor(0xFF1B1B1C);
+        cardBg.setCornerRadius(dpToPx(activity, 16));
         card.setBackground(cardBg);
-        card.setElevation(dpToPx(activity, 16));
-        card.setPadding(dpToPx(activity, 14), dpToPx(activity, 12), dpToPx(activity, 14), dpToPx(activity, 12));
+        card.setElevation(dpToPx(activity, 3));
+        card.setPadding(dpToPx(activity, 16), dpToPx(activity, 16), dpToPx(activity, 16), dpToPx(activity, 16));
 
-        // ROW 1: Header (Icon + Title/FTP + Readiness Pill)
+        // ROW 1: Header (Icon Badge + Title / Sync Status + Options Action)
         LinearLayout headerRow = new LinearLayout(activity);
         headerRow.setOrientation(LinearLayout.HORIZONTAL);
         headerRow.setGravity(Gravity.CENTER_VERTICAL);
 
+        // Subtle circular icon badge
         TextView iconBadge = new TextView(activity);
         iconBadge.setText("⚡");
         iconBadge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         iconBadge.setTextColor(Color.WHITE);
         iconBadge.setGravity(Gravity.CENTER);
-        int iconSize = dpToPx(activity, 30);
+        int iconSize = dpToPx(activity, 32);
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
         GradientDrawable iconBg = new GradientDrawable();
         iconBg.setShape(GradientDrawable.OVAL);
-        iconBg.setColors(new int[]{0xFF0284C7, 0xFF38BDF8});
-        iconBg.setOrientation(GradientDrawable.Orientation.TL_BR);
+        iconBg.setColor(0xFF2C2C2E);
         iconBadge.setBackground(iconBg);
         headerRow.addView(iconBadge, iconParams);
 
+        // Title and Subtitle column
         LinearLayout titleCol = new LinearLayout(activity);
         titleCol.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-        titleParams.setMargins(dpToPx(activity, 10), 0, dpToPx(activity, 8), 0);
+        titleParams.setMargins(dpToPx(activity, 12), 0, dpToPx(activity, 8), 0);
 
         TextView tvTitle = new TextView(activity);
-        tvTitle.setText("CyclingCoach Hub");
-        tvTitle.setTextColor(0xFFF8FAFC);
-        tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        tvTitle.setText("Intervals.icu");
+        tvTitle.setTextColor(0xFFFFFFFF);
+        tvTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         tvTitle.setTypeface(Typeface.DEFAULT_BOLD);
         titleCol.addView(tvTitle);
 
         TextView tvSub = new TextView(activity);
-        tvSub.setText("Dario • FTP 301 W (4,56 W/kg)");
-        tvSub.setTextColor(0xFF94A3B8);
+        tvSub.setTag("TAG_SYNC_SUBTITLE");
+        tvSub.setText("Cloud-Synchronisation • Auto-Sync");
+        tvSub.setTextColor(0xFF8E8E93);
         tvSub.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         titleCol.addView(tvSub);
 
         headerRow.addView(titleCol, titleParams);
 
+        // Status Pill badge
         TextView tvBadge = new TextView(activity);
-        tvBadge.setTag("TAG_COACH_BADGE");
-        tvBadge.setText("85% Optimal");
-        tvBadge.setTextColor(0xFF10B981);
+        tvBadge.setTag("TAG_SYNC_BADGE");
+        tvBadge.setText("● Aktiv");
+        tvBadge.setTextColor(0xFF34C759);
         tvBadge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         tvBadge.setTypeface(Typeface.DEFAULT_BOLD);
         tvBadge.setPadding(dpToPx(activity, 8), dpToPx(activity, 4), dpToPx(activity, 8), dpToPx(activity, 4));
         GradientDrawable pill = new GradientDrawable();
-        pill.setColor(0x2610B981);
+        pill.setColor(0x2034C759);
         pill.setCornerRadius(dpToPx(activity, 8));
         tvBadge.setBackground(pill);
         headerRow.addView(tvBadge);
 
+        // Tapping header opens detailed IntervalsActivity
+        headerRow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(activity, IntervalsActivity.class);
+                activity.startActivity(intent);
+            }
+        });
+
         card.addView(headerRow);
 
-        // ROW 2: Daily Corridor Banner
-        LinearLayout banner = new LinearLayout(activity);
-        banner.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams bannerParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        bannerParams.setMargins(0, dpToPx(activity, 10), 0, 0);
-        banner.setLayoutParams(bannerParams);
-
-        GradientDrawable bannerBg = new GradientDrawable();
-        bannerBg.setColor(0x1838BDF8);
-        bannerBg.setCornerRadius(dpToPx(activity, 10));
-        bannerBg.setStroke(dpToPx(activity, 1.0f), 0x3338BDF8);
-        banner.setBackground(bannerBg);
-        banner.setPadding(dpToPx(activity, 10), dpToPx(activity, 8), dpToPx(activity, 10), dpToPx(activity, 8));
-
-        TextView tvCorridor = new TextView(activity);
-        tvCorridor.setTag("TAG_COACH_CORRIDOR");
-        tvCorridor.setText("🎯 Tages-Korridor: Z4 Schwelle (270 bis 316 W)");
-        tvCorridor.setTextColor(0xFF38BDF8);
-        tvCorridor.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        tvCorridor.setTypeface(Typeface.DEFAULT_BOLD);
-        banner.addView(tvCorridor);
-
-        TextView tvClearance = new TextView(activity);
-        tvClearance.setTag("TAG_COACH_CLEARANCE");
-        tvClearance.setText("Freigabe: 100% Go • Volle Frische für Schwellenintervalle");
-        tvClearance.setTextColor(0xFFE2E8F0);
-        tvClearance.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-        banner.addView(tvClearance);
-
-        card.addView(banner);
-
-        // ROW 3: Metric Stat Boxes (TSB / Periodisierung / OSA)
+        // ROW 2: 3-Column Metrics (Fitness CTL / Ermüdung ATL / Form TSB)
         LinearLayout statsRow = new LinearLayout(activity);
         statsRow.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams statsParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         );
-        statsParams.setMargins(0, dpToPx(activity, 8), 0, 0);
+        statsParams.setMargins(0, dpToPx(activity, 14), 0, 0);
         statsRow.setLayoutParams(statsParams);
 
-        statsRow.addView(createStatBox(activity, "TAG_COACH_TSB", "TSB: +2.4"));
-        statsRow.addView(createStatBox(activity, "TAG_COACH_PHASE", "Phase: W2/4"));
-        statsRow.addView(createStatBox(activity, "TAG_COACH_OSA", "OSA: Normal"));
+        statsRow.addView(createMetricColumn(activity, "TAG_METRIC_CTL", "68.0", "Fitness (CTL)"));
+        statsRow.addView(createMetricColumn(activity, "TAG_METRIC_ATL", "65.0", "Ermüdung (ATL)"));
+        statsRow.addView(createMetricColumn(activity, "TAG_METRIC_TSB", "+3.0", "Form (TSB)"));
 
         card.addView(statsRow);
 
-        // ROW 4: Action Buttons (Sofort-Sync + Coach Dashboard)
-        LinearLayout btnRow = new LinearLayout(activity);
-        btnRow.setOrientation(LinearLayout.HORIZONTAL);
-        LinearLayout.LayoutParams btnRowParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        btnRowParams.setMargins(0, dpToPx(activity, 10), 0, 0);
-        btnRow.setLayoutParams(btnRowParams);
-
+        // ROW 3: Native RingConn White Pill Button ("⚡ Jetzt synchronisieren")
         TextView btnSync = new TextView(activity);
-        btnSync.setText("⚡ Sofort-Sync");
-        btnSync.setTextColor(Color.WHITE);
-        btnSync.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        btnSync.setText("⚡ Jetzt synchronisieren");
+        btnSync.setTextColor(0xFF000000);
+        btnSync.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         btnSync.setTypeface(Typeface.DEFAULT_BOLD);
         btnSync.setGravity(Gravity.CENTER);
-        btnSync.setPadding(0, dpToPx(activity, 10), 0, dpToPx(activity, 10));
+        btnSync.setPadding(0, dpToPx(activity, 12), 0, dpToPx(activity, 12));
+
         GradientDrawable syncBg = new GradientDrawable();
-        syncBg.setCornerRadius(dpToPx(activity, 10));
-        syncBg.setColors(new int[]{0xFF0284C7, 0xFF38BDF8});
-        syncBg.setOrientation(GradientDrawable.Orientation.TL_BR);
+        syncBg.setCornerRadius(dpToPx(activity, 24));
+        syncBg.setColor(0xFFFFFFFF); // Pure white button in RingConn style
         btnSync.setBackground(syncBg);
-        LinearLayout.LayoutParams syncParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-        syncParams.setMargins(0, 0, dpToPx(activity, 6), 0);
+
+        LinearLayout.LayoutParams syncParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        syncParams.setMargins(0, dpToPx(activity, 14), 0, 0);
         btnSync.setLayoutParams(syncParams);
 
         btnSync.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(activity, "⚡ Starte Übertragung zu Intervals.icu...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "⚡ Übertrage RingConn-Daten zu Intervals.icu...", Toast.LENGTH_SHORT).show();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -289,7 +264,7 @@ public class HookHelper {
                             @Override
                             public void run() {
                                 if (ok) {
-                                    Toast.makeText(activity, "✅ " + today + " erfolgreich zu Intervals.icu synchronisiert!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(activity, "✅ Intervals.icu erfolgreich synchronisiert!", Toast.LENGTH_LONG).show();
                                     updateCard(card, activity);
                                 } else {
                                     Toast.makeText(activity, "Sync-Status: " + msg, Toast.LENGTH_LONG).show();
@@ -300,63 +275,48 @@ public class HookHelper {
                 }).start();
             }
         });
-        btnRow.addView(btnSync);
 
-        TextView btnOpen = new TextView(activity);
-        btnOpen.setText("Coach-Dashboard ➔");
-        btnOpen.setTextColor(0xFF38BDF8);
-        btnOpen.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        btnOpen.setTypeface(Typeface.DEFAULT_BOLD);
-        btnOpen.setGravity(Gravity.CENTER);
-        btnOpen.setPadding(0, dpToPx(activity, 10), 0, dpToPx(activity, 10));
-        GradientDrawable openBg = new GradientDrawable();
-        openBg.setColor(0xFF1E293B);
-        openBg.setCornerRadius(dpToPx(activity, 10));
-        openBg.setStroke(dpToPx(activity, 1.0f), 0x4438BDF8);
-        btnOpen.setBackground(openBg);
-        LinearLayout.LayoutParams openParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-        openParams.setMargins(dpToPx(activity, 6), 0, 0, 0);
-        btnOpen.setLayoutParams(openParams);
-
-        btnOpen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, IntervalsActivity.class);
-                activity.startActivity(intent);
-            }
-        });
-        btnRow.addView(btnOpen);
-
-        card.addView(btnRow);
+        card.addView(btnSync);
 
         return card;
     }
 
-    private static LinearLayout createStatBox(Context context, String tag, String initialText) {
-        LinearLayout box = new LinearLayout(context);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setGravity(Gravity.CENTER);
+    private static LinearLayout createMetricColumn(Context context, String valTag, String initialVal, String label) {
+        LinearLayout col = new LinearLayout(context);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-        params.setMargins(dpToPx(context, 3), 0, dpToPx(context, 3), 0);
-        box.setLayoutParams(params);
+        params.setMargins(dpToPx(context, 4), 0, dpToPx(context, 4), 0);
+        col.setLayoutParams(params);
 
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0x50111827);
-        bg.setCornerRadius(dpToPx(context, 8));
-        bg.setStroke(dpToPx(context, 1.0f), 0x251E293B);
-        box.setBackground(bg);
-        box.setPadding(dpToPx(context, 4), dpToPx(context, 6), dpToPx(context, 4), dpToPx(context, 6));
+        bg.setColor(0xFF242426);
+        bg.setCornerRadius(dpToPx(context, 10));
+        col.setBackground(bg);
+        col.setPadding(dpToPx(context, 6), dpToPx(context, 10), dpToPx(context, 6), dpToPx(context, 10));
 
-        TextView tv = new TextView(context);
-        tv.setTag(tag);
-        tv.setText(initialText);
-        tv.setTextColor(0xFFF1F5F9);
-        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-        tv.setTypeface(Typeface.DEFAULT_BOLD);
-        tv.setGravity(Gravity.CENTER);
-        box.addView(tv);
+        TextView tvVal = new TextView(context);
+        tvVal.setTag(valTag);
+        tvVal.setText(initialVal);
+        tvVal.setTextColor(0xFFFFFFFF);
+        tvVal.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+        tvVal.setTypeface(Typeface.DEFAULT_BOLD);
+        tvVal.setGravity(Gravity.CENTER);
+        col.addView(tvVal);
 
-        return box;
+        TextView tvLabel = new TextView(context);
+        tvLabel.setText(label);
+        tvLabel.setTextColor(0xFF8E8E93);
+        tvLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        tvLabel.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams lblParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        lblParams.setMargins(0, dpToPx(context, 4), 0, 0);
+        tvLabel.setLayoutParams(lblParams);
+        col.addView(tvLabel);
+
+        return col;
     }
 
     public static void updateCard(final View card, final Activity activity) {
@@ -365,58 +325,46 @@ public class HookHelper {
             @Override
             public void run() {
                 try {
-                    String jsonStr = IntervalsSyncEngine.getCoachDataJson(activity);
-                    final JSONObject c = new JSONObject(jsonStr);
+                    android.content.SharedPreferences prefs = IntervalsSyncEngine.getPrefs(activity);
+                    final float ctl = prefs.getFloat(IntervalsSyncEngine.KEY_CTL, 68.0f);
+                    final float atl = prefs.getFloat(IntervalsSyncEngine.KEY_ATL, 65.0f);
+                    final float tsb = prefs.getFloat(IntervalsSyncEngine.KEY_TSB, 3.0f);
+                    final long lastSyncTime = prefs.getLong(IntervalsSyncEngine.KEY_LAST_SYNC_TIME, 0);
+
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             try {
-                                TextView tvBadge = card.findViewWithTag("TAG_COACH_BADGE");
-                                TextView tvCorridor = card.findViewWithTag("TAG_COACH_CORRIDOR");
-                                TextView tvClearance = card.findViewWithTag("TAG_COACH_CLEARANCE");
-                                TextView tvTsb = card.findViewWithTag("TAG_COACH_TSB");
-                                TextView tvPhase = card.findViewWithTag("TAG_COACH_PHASE");
-                                TextView tvOsa = card.findViewWithTag("TAG_COACH_OSA");
+                                TextView tvSub = card.findViewWithTag("TAG_SYNC_SUBTITLE");
+                                TextView tvCtl = card.findViewWithTag("TAG_METRIC_CTL");
+                                TextView tvAtl = card.findViewWithTag("TAG_METRIC_ATL");
+                                TextView tvTsb = card.findViewWithTag("TAG_METRIC_TSB");
 
-                                int score = c.optInt("readinessScore", 85);
-                                String label = c.optString("readinessLabel", "Optimal");
-                                if (tvBadge != null) {
-                                    tvBadge.setText(score + "% " + label);
-                                    GradientDrawable pill = new GradientDrawable();
-                                    pill.setCornerRadius(dpToPx(activity, 8));
-                                    if (score >= 80) {
-                                        pill.setColor(0x2610B981);
-                                        tvBadge.setTextColor(0xFF10B981);
-                                    } else if (score >= 55) {
-                                        pill.setColor(0x26F59E0B);
-                                        tvBadge.setTextColor(0xFFF59E0B);
+                                if (tvSub != null) {
+                                    if (lastSyncTime > 0) {
+                                        String timeStr = new SimpleDateFormat("dd.MM. HH:mm", Locale.GERMANY).format(new Date(lastSyncTime));
+                                        tvSub.setText("Letzter Sync: " + timeStr);
                                     } else {
-                                        pill.setColor(0x26EF4444);
-                                        tvBadge.setTextColor(0xFFEF4444);
+                                        tvSub.setText("Noch nicht synchronisiert");
                                     }
-                                    tvBadge.setBackground(pill);
                                 }
 
-                                if (tvCorridor != null) {
-                                    tvCorridor.setText("🎯 " + c.optString("corridor", "Z4 Schwelle: 270 bis 316 W"));
+                                if (tvCtl != null) {
+                                    tvCtl.setText(String.format(Locale.US, "%.1f", ctl));
                                 }
-                                if (tvClearance != null) {
-                                    tvClearance.setText(c.optString("clearance", "Freigabe: 100% Go") + " • Volle Frische");
+                                if (tvAtl != null) {
+                                    tvAtl.setText(String.format(Locale.US, "%.1f", atl));
                                 }
                                 if (tvTsb != null) {
-                                    double tsb = c.optDouble("tsb", 0.0);
                                     String sign = tsb > 0 ? "+" : "";
-                                    tvTsb.setText("TSB: " + sign + (Math.round(tsb * 10) / 10.0));
-                                }
-                                if (tvPhase != null) {
-                                    int w = c.optInt("blockWeek", 2);
-                                    tvPhase.setText("Phase: W" + w + " von 4");
-                                }
-                                if (tvOsa != null) {
-                                    JSONObject osa = c.optJSONObject("osa");
-                                    String status = (osa != null && osa.has("status")) ? osa.optString("status") : "Aktiv";
-                                    if (status.contains("Normal")) status = "Normal";
-                                    tvOsa.setText("OSA: " + status);
+                                    tvTsb.setText(sign + String.format(Locale.US, "%.1f", tsb));
+                                    if (tsb >= 0) {
+                                        tvTsb.setTextColor(0xFF34C759); // Green
+                                    } else if (tsb >= -25) {
+                                        tvTsb.setTextColor(0xFFFFFFFF); // Normal white
+                                    } else {
+                                        tvTsb.setTextColor(0xFFFF3B30); // Alert red
+                                    }
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
