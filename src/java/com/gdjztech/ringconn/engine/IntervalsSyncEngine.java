@@ -30,6 +30,9 @@ public class IntervalsSyncEngine {
     public static final String KEY_LAST_SYNC_TIME = "last_sync_time";
     public static final String KEY_LAST_SYNC_STATUS = "last_sync_status";
     public static final String KEY_LOGS = "sync_logs";
+    public static final String KEY_CTL = "cached_ctl";
+    public static final String KEY_ATL = "cached_atl";
+    public static final String KEY_TSB = "cached_tsb";
 
     public static SQLiteDatabase getDatabase(Context context) {
         return com.gdjztech.ringconn.provider.HealthDataProvider.getDbInstance(context);
@@ -97,6 +100,144 @@ public class IntervalsSyncEngine {
             obj.put("scoreSource", prefs.getString(KEY_SCORE_SOURCE, "athletic"));
             obj.put("lastSyncTime", prefs.getLong(KEY_LAST_SYNC_TIME, 0));
             obj.put("lastSyncStatus", prefs.getString(KEY_LAST_SYNC_STATUS, "Never synced"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return obj.toString();
+    }
+
+    public static String getOsaDataJson(Context context) {
+        JSONObject res = new JSONObject();
+        try {
+            res.put("enabled", true);
+            SQLiteDatabase db = getDatabase(context);
+            if (db != null) {
+                Cursor cursor = null;
+                try {
+                    cursor = db.query(
+                            "OSADataModel",
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "utc DESC",
+                            "7"
+                    );
+                    if (cursor != null && cursor.moveToFirst()) {
+                        res.put("hasRecords", true);
+                        int colAhi = cursor.getColumnIndex("ahiValue");
+                        int colCount = cursor.getColumnIndex("ahiCount");
+                        int colSpo2Low = cursor.getColumnIndex("spo2LowValue");
+                        int colMins = cursor.getColumnIndex("effectiveMonitorMinute");
+                        int colTime = cursor.getColumnIndex("updateTime");
+                        int colAdvice = cursor.getColumnIndex("healthAdvice");
+
+                        float ahi = colAhi >= 0 ? cursor.getFloat(colAhi) : 0f;
+                        int count = colCount >= 0 ? cursor.getInt(colCount) : 0;
+                        int spo2Low = colSpo2Low >= 0 ? cursor.getInt(colSpo2Low) : 0;
+                        int mins = colMins >= 0 ? cursor.getInt(colMins) : 0;
+                        String updateTime = colTime >= 0 ? cursor.getString(colTime) : "";
+                        String advice = colAdvice >= 0 ? cursor.getString(colAdvice) : "";
+
+                        res.put("latestAhi", ahi);
+                        res.put("ahiCount", count);
+                        res.put("spo2Low", spo2Low);
+                        res.put("effectiveMinutes", mins);
+                        res.put("updateTime", updateTime);
+                        res.put("advice", advice);
+
+                        String status = ahi < 5.0f ? "Normal (< 5/h)" : (ahi < 15.0f ? "Leicht (5-15/h)" : (ahi < 30.0f ? "Moderat (15-30/h)" : "Schwer (> 30/h)"));
+                        res.put("status", status);
+                    } else {
+                        res.put("hasRecords", false);
+                        res.put("status", "Monitoring aktiv");
+                        res.put("message", "Kontinuierliche SpO2-Überwachung aktiv. Werte werden nach vollständiger Schlafmessung ausgewertet.");
+                    }
+                } finally {
+                    if (cursor != null) cursor.close();
+                }
+            } else {
+                res.put("hasRecords", false);
+                res.put("status", "DB nicht verfügbar");
+            }
+        } catch (Exception e) {
+            try {
+                res.put("enabled", true);
+                res.put("hasRecords", false);
+                res.put("status", "Aktiv");
+                res.put("error", e.getMessage());
+            } catch (Exception ignored) {}
+        }
+        return res.toString();
+    }
+
+    public static String getCoachDataJson(Context context) {
+        JSONObject obj = new JSONObject();
+        try {
+            SharedPreferences prefs = getPrefs(context);
+            float ctl = prefs.getFloat(KEY_CTL, 68.0f);
+            float atl = prefs.getFloat(KEY_ATL, 65.0f);
+            float tsb = prefs.getFloat(KEY_TSB, ctl - atl);
+
+            SQLiteDatabase db = getDatabase(context);
+            int rhr = 46;
+            int hrv = 68;
+            float tempOffset = 0.0f;
+            String latestDate = "";
+            int sleepScore = 80;
+
+            if (db != null) {
+                Cursor cursor = null;
+                try {
+                    cursor = db.query(
+                            "SleepSyncModel",
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "dateSleep DESC",
+                            "1"
+                    );
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int colDate = cursor.getColumnIndex("dateSleep");
+                        int colRestingHr = cursor.getColumnIndex("restingHr");
+                        int colHrvAvg = cursor.getColumnIndex("hrvAvg");
+                        int colTempOffset = cursor.getColumnIndex("tempOffset");
+                        int colScore = cursor.getColumnIndex("sleepScore");
+                        int colDeep = cursor.getColumnIndex("deepDuration");
+                        int colRem = cursor.getColumnIndex("remDuration");
+                        int colAwake = cursor.getColumnIndex("awakeDuration");
+                        int colSleepDur = cursor.getColumnIndex("sleepDuration");
+
+                        if (colDate >= 0) latestDate = cursor.getString(colDate);
+                        if (colRestingHr >= 0 && !cursor.isNull(colRestingHr)) rhr = cursor.getInt(colRestingHr);
+                        if (colHrvAvg >= 0 && !cursor.isNull(colHrvAvg)) hrv = (int) cursor.getFloat(colHrvAvg);
+                        if (colTempOffset >= 0 && !cursor.isNull(colTempOffset)) tempOffset = cursor.getFloat(colTempOffset);
+
+                        int totalM = colSleepDur >= 0 ? (int) cursor.getFloat(colSleepDur) : 0;
+                        int deepM = colDeep >= 0 ? (int) cursor.getFloat(colDeep) : 0;
+                        int remM = colRem >= 0 ? (int) cursor.getFloat(colRem) : 0;
+                        int awakeM = colAwake >= 0 ? (int) cursor.getFloat(colAwake) : 0;
+                        sleepScore = calculateAthleticSleepScore(totalM, deepM, remM, awakeM);
+                    }
+                } finally {
+                    if (cursor != null) cursor.close();
+                }
+            }
+
+            CoachBrain.EvaluationResult eval = CoachBrain.evaluate(rhr, hrv, tempOffset, ctl, atl, tsb, null);
+            obj = eval.toJson();
+            obj.put("latestDate", latestDate);
+            obj.put("restingHr", rhr);
+            obj.put("hrv", hrv);
+            obj.put("tempOffset", tempOffset);
+            obj.put("sleepScore", sleepScore);
+
+            String osaStr = getOsaDataJson(context);
+            obj.put("osa", new JSONObject(osaStr));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -404,6 +545,29 @@ public class IntervalsSyncEngine {
             result.put("statusCode", responseCode);
             result.put("message", "HTTP " + responseCode + (isSuccess ? " OK" : ": " + resp.toString()));
             result.put("date", targetDate);
+
+            if (isSuccess && resp.length() > 0) {
+                try {
+                    JSONObject respJson = new JSONObject(resp.toString());
+                    SharedPreferences.Editor ed = prefs.edit();
+                    boolean updated = false;
+                    if (respJson.has("ctl") && !respJson.isNull("ctl")) {
+                        ed.putFloat(KEY_CTL, (float) respJson.getDouble("ctl"));
+                        updated = true;
+                    }
+                    if (respJson.has("atl") && !respJson.isNull("atl")) {
+                        ed.putFloat(KEY_ATL, (float) respJson.getDouble("atl"));
+                        updated = true;
+                    }
+                    if (respJson.has("ctl") && respJson.has("atl") && !respJson.isNull("ctl") && !respJson.isNull("atl")) {
+                        float ctlVal = (float) respJson.getDouble("ctl");
+                        float atlVal = (float) respJson.getDouble("atl");
+                        ed.putFloat(KEY_TSB, ctlVal - atlVal);
+                        updated = true;
+                    }
+                    if (updated) ed.apply();
+                } catch (Exception ignored) {}
+            }
 
             String sourceLabel = "ringconn".equalsIgnoreCase(scoreSource) ? "Official" : "Athletic";
             String statusSummary = isSuccess ? "Synced " + targetDate + " (Score " + chosenScore + " [" + sourceLabel + "], HTTP " + responseCode + ")" : "Failed " + targetDate + " (" + responseCode + ")";

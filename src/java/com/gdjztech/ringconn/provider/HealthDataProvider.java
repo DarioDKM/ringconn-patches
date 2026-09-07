@@ -40,6 +40,18 @@ public class HealthDataProvider extends ContentProvider {
                         @Override public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
                         @Override public void onActivityDestroyed(Activity activity) {}
                     });
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                SQLiteDatabase database = getDbInstance(appCtx);
+                                if (database != null) {
+                                    database.execSQL("UPDATE UserInfo SET isOSAHSAgreeTerm = 1, hasOpenOSAReport = 1 WHERE isOSAHSAgreeTerm != 1 OR hasOpenOSAReport != 1;");
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                    }).start();
                 }
             }
         } catch (Exception e) {

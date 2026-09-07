@@ -49,6 +49,16 @@ public class IntervalsBridge {
     }
 
     @JavascriptInterface
+    public String getCoachData() {
+        return IntervalsSyncEngine.getCoachDataJson(activity);
+    }
+
+    @JavascriptInterface
+    public String getOsaData() {
+        return IntervalsSyncEngine.getOsaDataJson(activity);
+    }
+
+    @JavascriptInterface
     public void close() {
         activity.runOnUiThread(new Runnable() {
             @Override

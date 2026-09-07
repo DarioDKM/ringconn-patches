@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.1 (2026-09-07)
+
+### Features & Architecture
+* **Natives CyclingCoach-Hub im Discover-Tab:**
+  * Schwebender FAB von Standard-Tabs (Insights, Health, Plan, Me) entfernt.
+  * Native Glassmorphism-Kachel exklusiv im Discover-Tab integriert mit Tages-Readiness, Wattkorridor-Empfehlung (301 W FTP), TSB-Status, Periodisierungsphase und Sofort-Sync-Button.
+  * Latenzfreie Umschaltung via Window-Touch-Callback auf der unteren Navigationsleiste.
+* **Erweiterter Coach-Reiter im Embedded Dashboard:**
+  * Vollwertiger Startreiter mit Tages-Freigabe, Wattkorridoren nach Coggan/Hunter, Durability-Leitfaden für Spätbelastungen über 2.000 kJ, Formsteuerung (CTL/ATL/TSB) und veganer Verpflegungsstrategie.
+* **Schlafapnoe-Monitoring (OSA):**
+  * Nativer Freischalt-Hook in UserInfo (`isOSAHSAgreeTerm = 1`, `hasOpenOSAReport = 1`).
+  * Nächtliche OSA-Auswertung und SpO2-Tiefstwerte direkt im Dashboard und Datenprovider verfügbar.
+
 ## 1.2.0 (2026-09-06)
 
 ### Features & Architecture
