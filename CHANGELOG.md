@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.3 (2026-09-07)
+
+### Fixes & Optimizations
+* **Intervals.icu API Payload:** Nicht unterstütztes Feld `skinTemp` aus dem PUT-Payload entfernt, wodurch HTTP 422 Fehler behoben sind. Lokale Temperaturüberwachung bleibt im CoachBrain aktiv.
+* **Intelligenter Datums-Fallback:** Automatischer Fallback auf den jüngsten Schlafeintrag, falls für das aktuelle Datum noch kein Schlafzyklus abgeschlossen ist.
+* **Persistenter Discover-Tab-Status:** Zuverlässige Erhaltung der Hub-Kachel-Sichtbarkeit bei Rückkehr aus dem Dashboard oder Activity-Wechseln.
+
 ## 1.2.2 (2026-09-07)
 
 ### Features & Architecture

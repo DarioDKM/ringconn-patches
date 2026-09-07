@@ -431,9 +431,24 @@ public class IntervalsSyncEngine {
             );
 
             if (cursor == null || !cursor.moveToFirst()) {
-                result.put("success", false);
-                result.put("message", "No sleep record found for date: " + targetDate);
-                return result;
+                if (cursor != null) cursor.close();
+                cursor = db.query(
+                        "SleepSyncModel",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "dateSleep DESC",
+                        "1"
+                );
+                if (cursor == null || !cursor.moveToFirst()) {
+                    result.put("success", false);
+                    result.put("message", "No sleep record found in local database.");
+                    return result;
+                }
+                int colD = cursor.getColumnIndex("dateSleep");
+                if (colD >= 0) targetDate = cursor.getString(colD);
             }
 
             JSONObject payload = new JSONObject();
@@ -490,9 +505,8 @@ public class IntervalsSyncEngine {
                     payload.put("respiration", Math.round((rawRr / 8.0f) * 10.0f) / 10.0);
                 }
             }
-            if (colTempOffset >= 0 && !cursor.isNull(colTempOffset)) {
-                payload.put("skinTemp", Math.round(cursor.getFloat(colTempOffset) * 100.0) / 100.0);
-            }
+            // Note: Intervals.icu standard wellness rejects skinTemp with HTTP 422.
+            // Temperature evaluation is handled natively inside CoachBrain.
             if (deepMins > 0) {
                 payload.put("DeepSleep", deepMins);
             }

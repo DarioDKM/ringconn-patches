@@ -37,6 +37,7 @@ public class HookHelper {
 
     public static final String TAG_CARD = "CYCLING_COACH_DISCOVER_CARD";
     public static final String TAG_OLD_FAB = "INTERVALS_SYNC_FAB";
+    private static volatile boolean sIsDiscoverTab = false;
 
     public static void attachFloatingButton(final Activity activity) {
         if (activity == null) return;
@@ -64,14 +65,24 @@ public class HookHelper {
                     }
 
                     // 2. Check if card already attached
-                    if (root.findViewWithTag(TAG_CARD) != null) {
+                    View existingCard = root.findViewWithTag(TAG_CARD);
+                    if (existingCard != null) {
+                        if (sIsDiscoverTab) {
+                            existingCard.setVisibility(View.VISIBLE);
+                            updateCard(existingCard, activity);
+                        } else {
+                            existingCard.setVisibility(View.GONE);
+                        }
                         return;
                     }
 
                     // 3. Build native Discover Coach Card
                     final LinearLayout card = buildCoachCard(activity);
                     card.setTag(TAG_CARD);
-                    card.setVisibility(View.GONE); // Default hidden until Discover tab active
+                    card.setVisibility(sIsDiscoverTab ? View.VISIBLE : View.GONE);
+                    if (sIsDiscoverTab) {
+                        updateCard(card, activity);
+                    }
 
                     int marginPx = dpToPx(activity, 14);
                     int bottomMarginPx = dpToPx(activity, 68); // positioned directly above bottom nav bar
@@ -103,22 +114,13 @@ public class HookHelper {
                                 if (rootNode != null) {
                                     boolean hasSelectExercise = findNodeWithText(rootNode, "Select Exercise");
                                     rootNode.recycle();
-                                    if (hasSelectExercise && card.getVisibility() != View.VISIBLE) {
-                                        card.setVisibility(View.VISIBLE);
-                                        updateCard(card, activity);
-                                    } else if (!hasSelectExercise && card.getVisibility() == View.VISIBLE) {
-                                        AccessibilityNodeInfo rootNode2 = decor.createAccessibilityNodeInfo();
-                                        if (rootNode2 != null) {
-                                            boolean isOtherTab = findNodeWithText(rootNode2, "Activity") ||
-                                                    findNodeWithText(rootNode2, "Vital Signs") ||
-                                                    findNodeWithText(rootNode2, "Stress") ||
-                                                    findNodeWithText(rootNode2, "Insights");
-                                            rootNode2.recycle();
-                                            if (isOtherTab) {
-                                                card.setVisibility(View.GONE);
-                                            }
-                                        }
+                                    if (hasSelectExercise) {
+                                        sIsDiscoverTab = true;
                                     }
+                                }
+                                if (sIsDiscoverTab && card.getVisibility() != View.VISIBLE) {
+                                    card.setVisibility(View.VISIBLE);
+                                    updateCard(card, activity);
                                 }
                             } catch (Exception ignored) {}
                             handler.postDelayed(this, 400);
@@ -473,6 +475,7 @@ public class HookHelper {
                 int threshold = dpToPx(activity, 85);
                 if (y > (h - threshold)) {
                     boolean isDiscover = (x >= 0.20f * w && x <= 0.40f * w);
+                    sIsDiscoverTab = isDiscover;
                     card.setVisibility(isDiscover ? View.VISIBLE : View.GONE);
                     if (isDiscover) {
                         updateCard(card, activity);

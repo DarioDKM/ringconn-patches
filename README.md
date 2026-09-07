@@ -73,7 +73,7 @@ $$\text{Score} = \text{Duration} (40\,\text{pts}) + \text{Deep Sleep} (25\,\text
 
 ## Building From Source
 
-To build `patches-1.2.2.mpp` locally:
+To build `patches-1.2.3.mpp` locally:
 
 ```bash
 git clone https://github.com/DarioDKM/ringconn-patches.git
@@ -81,7 +81,7 @@ cd ringconn-patches
 ./build.sh
 ```
 
-Output bundle will be located at `dist/patches-1.2.2.mpp`.
+Output bundle will be located at `dist/patches-1.2.3.mpp`.
 
 ---
 
