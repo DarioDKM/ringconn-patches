@@ -14,7 +14,7 @@ This repository provides two modular patches that can be toggled independently i
 * Lightweight: no UI elements, zero overhead.
 
 ### 2. Embedded Intervals Direct Dashboard (`ringconn-dashboard`)
-* **Floating Action Button & Standalone Shortcut:** Injects an unobtrusive floating button into the RingConn main screen and provides a dedicated app launcher shortcut.
+* **Floating Action Button:** Injects an unobtrusive floating button into the RingConn main screen to open the dashboard directly without cluttering the app drawer.
 * **OLED Dark Dashboard:** Complete English UI with deep `#070A11` background, stage percentages (`%` and minutes), efficiency rating, and 30-day sleep history.
 * **Dual Sleep Score Engine:**
   * **Athletic (Recommended):** Non-linear sports recovery algorithm calibrated for endurance athletes. Prevents the common commercial inflation of short sleep durations by weighting sleep duration ($T^{2.2}$), slow-wave deep sleep ($D^{1.5}$), REM ($R^{1.5}$), and wake-after-sleep-onset (WASO).

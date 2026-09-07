@@ -71,7 +71,7 @@
     invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
     const-string v4, "android:exported"
-    const-string v5, "true"
+    const-string v5, "false"
     invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
     const-string v4, "android:label"
@@ -81,32 +81,6 @@
     const-string v4, "android:theme"
     const-string v5, "@android:style/Theme.DeviceDefault.NoActionBar"
     invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
-
-    # Erzeuge <intent-filter>
-    const-string v4, "intent-filter"
-    invoke-virtual {v1, v4}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
-    move-result-object v4
-
-    # Erzeuge <action>
-    const-string v5, "action"
-    invoke-virtual {v1, v5}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
-    move-result-object v5
-    const-string v6, "android:name"
-    const-string v7, "android.intent.action.MAIN"
-    invoke-interface {v5, v6, v7}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
-    invoke-interface {v4, v5}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
-
-    # Erzeuge <category>
-    const-string v5, "category"
-    invoke-virtual {v1, v5}, Lapp/morphe/patcher/util/Document;->createElement(Ljava/lang/String;)Lorg/w3c/dom/Element;
-    move-result-object v5
-    const-string v6, "android:name"
-    const-string v7, "android.intent.category.LAUNCHER"
-    invoke-interface {v5, v6, v7}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
-    invoke-interface {v4, v5}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
-
-    # Fuege <intent-filter> zu <activity> hinzu
-    invoke-interface {v3, v4}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
 
     # Fuege <activity> zu <application> hinzu
     invoke-interface {v2, v3}, Lorg/w3c/dom/Element;->appendChild(Lorg/w3c/dom/Node;)Lorg/w3c/dom/Node;
