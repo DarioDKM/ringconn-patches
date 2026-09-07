@@ -76,7 +76,7 @@
     invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
     const-string v4, "android:authorities"
-    const-string v5, "com.gdjztech.ringconn.debug.provider"
+    const-string v5, "com.gdjztech.ringconn.provider"
     invoke-interface {v3, v4, v5}, Lorg/w3c/dom/Element;->setAttribute(Ljava/lang/String;Ljava/lang/String;)V
 
     const-string v4, "android:exported"
