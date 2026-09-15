@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.6 (2026-09-15)
+
+### Optimierungen
+* **Kalibrierte Baumtiefe & Auflösungsunabhängigkeit:**
+  * Maximale Traversierungstiefe im Flutter-Semantik-Baum auf 50 Ebenen angehoben, damit alle Discover-Root-Container zuverlässig aufgelöst werden.
+  * Dynamische relative Koordinatenberechnung für Statusleiste, Inhaltsbereich und untere Navigationsleiste.
+  * Versionierungssprung zur Erzwingung der Cloud-Aktualisierung im Morphe Manager.
+
 ## 1.2.5 (2026-09-15)
 
 ### Fixes & Robustheit
