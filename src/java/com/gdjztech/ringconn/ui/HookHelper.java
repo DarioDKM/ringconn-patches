@@ -298,13 +298,13 @@ public class HookHelper {
     }
 
     private static class ScreenState {
-        boolean hasTopDiscoverTitle = false;
-        boolean hasBottomNav = false;
-        boolean hasBackButton = false;
+        boolean hasTopDiscover = false;
+        boolean hasBottomDiscover = false;
+        boolean hasContent = false;
     }
 
     private static void evaluateNode(AccessibilityNodeInfo node, ScreenState state, int screenHeight, int depth) {
-        if (node == null || depth > 12) return;
+        if (node == null || depth > 50) return;
 
         CharSequence text = node.getText();
         CharSequence desc = node.getContentDescription();
@@ -315,28 +315,19 @@ public class HookHelper {
 
         if (!str.isEmpty()) {
             // 1. Top header "Discover"
-            if ("Discover".equalsIgnoreCase(str) && bounds.top < 350 && bounds.bottom < 450) {
-                state.hasTopDiscoverTitle = true;
+            if ("Discover".equalsIgnoreCase(str) && bounds.top < (screenHeight * 0.20f)) {
+                state.hasTopDiscover = true;
             }
 
-            // 2. Bottom navigation bar (Insights, Health, Plan, Me)
-            // These tabs ONLY exist at the bottom of the root screens.
-            // In ANY submenu or detail view (like exercise details, workout history, etc.), Flutter pushes
-            // a new route and the bottom navigation bar is completely absent!
-            if (bounds.top > screenHeight - 350) {
-                if ("Insights".equalsIgnoreCase(str) || "Health".equalsIgnoreCase(str) ||
-                    "Plan".equalsIgnoreCase(str) || "Me".equalsIgnoreCase(str)) {
-                    state.hasBottomNav = true;
-                }
+            // 2. Bottom navigation tab "Discover"
+            if ("Discover".equalsIgnoreCase(str) && bounds.top > (screenHeight * 0.80f)) {
+                state.hasBottomDiscover = true;
             }
 
-            // 3. Back button detection (indicates a sub-page/detail view is open)
-            if (bounds.left < 250 && bounds.top < 350) {
-                if ("Back".equalsIgnoreCase(str) || "Zurück".equalsIgnoreCase(str) ||
-                    "Navigate up".equalsIgnoreCase(str) || "Close".equalsIgnoreCase(str) ||
-                    "Schließen".equalsIgnoreCase(str) || "Cancel".equalsIgnoreCase(str)) {
-                    state.hasBackButton = true;
-                }
+            // 3. Discover main content ("Sort" button or Exercise card)
+            if (("Sort".equalsIgnoreCase(str) || str.startsWith("Exercise")) && 
+                bounds.top >= (screenHeight * 0.08f) && bounds.top <= (screenHeight * 0.70f)) {
+                state.hasContent = true;
             }
         }
 
@@ -361,15 +352,17 @@ public class HookHelper {
             if (rootNode == null) return false;
 
             int screenHeight = activity.getResources().getDisplayMetrics().heightPixels;
+            if (screenHeight <= 0) screenHeight = 2400;
+
             ScreenState state = new ScreenState();
             evaluateNode(rootNode, state, screenHeight, 0);
 
-            // A valid root Discover screen MUST have:
-            // 1. Top "Discover" title
-            // 2. Bottom navigation bar (Insights, Health, etc.)
-            // 3. NO back button
-            return state.hasTopDiscoverTitle && state.hasBottomNav && !state.hasBackButton;
-        } catch (Exception ignored) {
+            boolean isRoot = state.hasTopDiscover && state.hasBottomDiscover && state.hasContent;
+            android.util.Log.d("HookHelper", "checkIsDiscoverRoot: top=" + state.hasTopDiscover + 
+                    ", bottom=" + state.hasBottomDiscover + ", content=" + state.hasContent + " => " + isRoot);
+            return isRoot;
+        } catch (Exception e) {
+            android.util.Log.e("HookHelper", "checkIsDiscoverRoot error", e);
             return false;
         } finally {
             if (rootNode != null) {
