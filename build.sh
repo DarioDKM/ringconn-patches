@@ -105,13 +105,6 @@ MF_EOF
 
 (cd "$MPP_STAGING" && zip -q -r "$DIST_DIR/patches-1.2.5.mpp" classes.dex extensions META-INF)
 cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches.mpp"
-cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches-1.2.4.mpp"
-cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches-1.2.3.mpp"
-cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches-1.2.2.mpp"
-cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches-1.2.1.mpp"
-cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches-1.2.0.mpp"
-cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches-1.1.0.mpp"
-cp "$DIST_DIR/patches-1.2.5.mpp" "$DIST_DIR/patches-1.0.0.mpp"
 
 echo "==> Done! Output bundle: $DIST_DIR/patches-1.2.5.mpp"
 ls -lh "$DIST_DIR/patches-1.2.5.mpp"
