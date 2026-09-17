@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.7 (2026-09-17)
+
+### Fixes & Robuste Touch-Navigation
+* **Beseitigung der Flutter Accessibility-Falle:**
+  * Komplette Entfernung des fehlerhaften periodischen Semantik-Baum-Checks (`createAccessibilityNodeInfo`), welcher in Flutter ohne aktiven Screenreader stets leer blieb und die Kachel fälschlicherweise dauerhaft ausblendete.
+* **Latenzfreie Interaktionssteuerung:**
+  * Schalten auf `View.VISIBLE` direkt beim Antippen des Discover-Reiters (18 % bis 42 % der unteren Leiste).
+  * Sofortiges Ausblenden (`View.GONE`) beim Wechsel auf andere Hauptreiter (Insights, Health, Plan, Me).
+  * Zuverlässiges Ausblenden bei Klicks in Untermenüs (Workout-Karten, Sortierung oder Inhaltsbereiche oberhalb und unterhalb der Kachel).
+  * Automatische Wiederanzeige bei Zurück-Gesten, Betätigung der Hardware-/System-Zurück-Taste, Tippen auf den Zurück-Pfeil oben links oder erneutem Antippen des Discover-Reiters.
+
 ## 1.2.6 (2026-09-15)
 
 ### Optimierungen
