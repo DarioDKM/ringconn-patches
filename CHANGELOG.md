@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.8 (2026-09-17)
+
+### Fokussierung & Bereinigung
+* **Reine Datenübertragung:**
+  * Vollständige Entfernung des Coaching-Reiters (Wattkorridore, Wonhalde-Bestwerte, Durability-Vorgaben, Periodisierung und Verpflegungsregeln) aus dem eingebetteten RingConn-Hub.
+  * Das Hub fungiert nun als schlankes, reines Synchronisationswerkzeug für die Übertragung von RingConn-Daten (Schlafdauer, Ruhepuls, HRV, SpO2, Temperatur) zu Intervals.icu.
+  * Sämtliche Trainingssteuerung, Leistungsdiagnostik und das Whoop 4.0 Dashboard sind exklusiv in die eigenständige CyclingCoach-App überführt.
+
 ## 1.2.7 (2026-09-17)
 
 ### Fixes & Robuste Touch-Navigation
