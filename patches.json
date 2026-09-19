@@ -1,0 +1,87 @@
+{
+  "version": "1.2.10",
+  "patches": [
+    {
+      "name": "RingConn Health Data Provider (v1.2.10)",
+      "description": "v1.2.10: Enables local SQLite database access for companion apps and third-party tools.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.gdjztech.ringconn",
+          "name": "RingConn",
+          "description": "Smart Ring companion app",
+          "apkFileType": null,
+          "appIconColor": "#1E88E5",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "4.4.6",
+              "versionCodes": [137],
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": "Recommended official RingConn version"
+            },
+            {
+              "version": "4.4.0",
+              "versionCodes": [135],
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": "Official RingConn version"
+            },
+            {
+              "version": null,
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Supports any version of RingConn"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Intervals.icu Quick-Sync Tile (v1.2.10)",
+      "description": "v1.2.10: Streamlined Intervals.icu sync dashboard in the Discover tab. Pure wellness data transfer.",
+      "default": true,
+      "dependencies": [
+        "RingConn Health Data Provider (v1.2.10)"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.gdjztech.ringconn",
+          "name": "RingConn",
+          "description": "Smart Ring companion app",
+          "apkFileType": null,
+          "appIconColor": "#1E88E5",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "4.4.6",
+              "versionCodes": [137],
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": "Recommended official RingConn version"
+            },
+            {
+              "version": "4.4.0",
+              "versionCodes": [135],
+              "isExperimental": false,
+              "minSdk": 26,
+              "description": "Official RingConn version"
+            },
+            {
+              "version": null,
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Supports any version of RingConn"
+            }
+          ]
+        }
+      ],
+      "options": []
+    }
+  ]
+}
