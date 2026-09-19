@@ -29,7 +29,7 @@
 * **Reine Datenübertragung:**
   * Vollständige Entfernung des Coaching-Reiters (Wattkorridore, Wonhalde-Bestwerte, Durability-Vorgaben, Periodisierung und Verpflegungsregeln) aus dem eingebetteten RingConn-Hub.
   * Das Hub fungiert nun als schlankes, reines Synchronisationswerkzeug für die Übertragung von RingConn-Daten (Schlafdauer, Ruhepuls, HRV, SpO2, Temperatur) zu Intervals.icu.
-  * Sämtliche Trainingssteuerung, Leistungsdiagnostik und das Whoop 4.0 Dashboard sind exklusiv in die eigenständige CyclingCoach-App überführt.
+  * Sämtliche Trainingssteuerung, Leistungsdiagnostik und das erweiterte Dashboard sind exklusiv in eine separate Companion-App überführt.
 
 ## 1.2.7 (2026-09-17)
 
@@ -70,7 +70,7 @@
 ## 1.2.2 (2026-09-07)
 
 ### Features & Architecture
-* **Natives CyclingCoach-Hub im Discover-Tab:**
+* **Natives Quick-Sync-Hub im Discover-Tab:**
   * Schwebender FAB von Standard-Tabs (Insights, Health, Plan, Me) entfernt.
   * Native Glassmorphism-Kachel exklusiv im Discover-Tab integriert mit Tages-Readiness, Wattkorridor-Empfehlung (301 W FTP), TSB-Status, Periodisierungsphase und Sofort-Sync-Button.
   * Latenzfreie Umschaltung via Window-Touch-Callback auf der unteren Navigationsleiste.

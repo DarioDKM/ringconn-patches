@@ -3,7 +3,7 @@
   "patches": [
     {
       "name": "RingConn Health Data Provider (v1.2.10)",
-      "description": "v1.2.10: Enables local SQLite database access for CyclingCoach and companion apps.",
+      "description": "v1.2.10: Enables local SQLite database access for companion apps and third-party tools.",
       "default": true,
       "dependencies": [],
       "compatiblePackages": [

@@ -28,7 +28,7 @@
     new-instance v3, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderBytecodeBuilder;
     invoke-direct {v3}, Lapp/morphe/patches/ringconn/RingConnSyncPatchKt$ProviderBytecodeBuilder;-><init>()V
     const-string v0, "RingConn Health Data Provider (v1.2.10)"
-    const-string v1, "v1.2.10: Enables local SQLite database access for CyclingCoach and companion apps."
+    const-string v1, "v1.2.10: Enables local SQLite database access for companion apps and third-party tools."
     const/4 v2, 0x1
     const/4 v4, 0x0
     const/4 v5, 0x0
