@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.10 (2026-09-19)
+
+### Localization & UI Consistency
+* **English Patch Metadata & Descriptions:**
+  * Updated `patches-list.json`, `patches-bundle.json` and Smali definitions with comprehensive English titles and descriptions.
+  * Replaced German target descriptions with clear English metadata.
+* **Full English Dashboard & Tile Interface:**
+  * Complete English localization in `DashboardHtml.java` for metrics, sleep stages, status indicators, toasts and settings.
+  * English status labels and button text in `HookHelper.java` (Cloud Sync, Sync Now, Active, Synced, Ready).
+
 ## 1.2.9 (2026-09-19)
 
 ### Fixes & Stabilität im Dashboard-Fenster

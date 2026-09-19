@@ -93,7 +93,7 @@ cat << 'MF_EOF' > "$MPP_STAGING/META-INF/MANIFEST.MF"
 Manifest-Version: 1.0
 Name: RingConn Patches
 Description: Morphe patches for RingConn: Health Data Provider & Embedded Intervals Direct Dashboard
-Version: 1.2.9
+Version: 1.2.10
 Timestamp: 1789830000000
 Source: https://github.com/DarioDKM/ringconn-patches
 Author: DarioDKM
@@ -103,9 +103,9 @@ Patcher-Version: 1.10.0
 
 MF_EOF
 
-(cd "$MPP_STAGING" && zip -q -r "$DIST_DIR/patches-1.2.9.mpp" classes.dex extensions META-INF)
-cp "$DIST_DIR/patches-1.2.9.mpp" "$DIST_DIR/patches.mpp"
+(cd "$MPP_STAGING" && zip -q -r "$DIST_DIR/patches-1.2.10.mpp" classes.dex extensions META-INF)
+cp "$DIST_DIR/patches-1.2.10.mpp" "$DIST_DIR/patches.mpp"
 
-echo "==> Done! Output bundle: $DIST_DIR/patches-1.2.9.mpp"
-ls -lh "$DIST_DIR/patches-1.2.9.mpp"
+echo "==> Done! Output bundle: $DIST_DIR/patches-1.2.10.mpp"
+ls -lh "$DIST_DIR/patches-1.2.10.mpp"
 
