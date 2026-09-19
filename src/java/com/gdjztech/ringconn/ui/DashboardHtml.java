@@ -191,8 +191,8 @@ public class DashboardHtml {
         sb.append("            </div>\n");
         sb.append("            <div class=\"form-group\">\n");
         sb.append("                <label class=\"form-label\">Athlete ID</label>\n");
-        sb.append("                <input class=\"form-input\" id=\"cfg-athlete-id\" placeholder=\"i557347\">\n");
-        sb.append("                <div class=\"form-hint\">Your personal Intervals.icu athlete identifier.</div>\n");
+        sb.append("                <input class=\"form-input\" id=\"cfg-athlete-id\" placeholder=\"e.g. i12345\">\n");
+        sb.append("                <div class=\"form-hint\">Your Intervals.icu Athlete ID (e.g. i12345 or 0 for main account)</div>\n");
         sb.append("            </div>\n");
         sb.append("            <div class=\"form-group\">\n");
         sb.append("                <label class=\"form-label\">API Key</label>\n");
@@ -307,7 +307,7 @@ public class DashboardHtml {
         sb.append("                const elKey = document.getElementById(\"cfg-api-key\");\n");
         sb.append("                const elAuto = document.getElementById(\"cfg-auto-sync\");\n");
         sb.append("\n");
-        sb.append("                if (elAth) elAth.value = settings.athleteId || \"i557347\";\n");
+        sb.append("                if (elAth) elAth.value = settings.athleteId || \"\";\n");
         sb.append("                if (elKey) elKey.value = settings.apiKey || \"\";\n");
         sb.append("                if (elAuto) elAuto.checked = settings.autoSync !== false;\n");
         sb.append("\n");

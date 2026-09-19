@@ -27,7 +27,7 @@
 
 ### Fokussierung & Bereinigung
 * **Reine Datenübertragung:**
-  * Vollständige Entfernung des Coaching-Reiters (Wattkorridore, Wonhalde-Bestwerte, Durability-Vorgaben, Periodisierung und Verpflegungsregeln) aus dem eingebetteten RingConn-Hub.
+  * Vollständige Entfernung des Coaching-Reiters (Trainingsvorgaben, Wattkorridore und Periodisierungsregeln) aus dem eingebetteten RingConn-Hub.
   * Das Hub fungiert nun als schlankes, reines Synchronisationswerkzeug für die Übertragung von RingConn-Daten (Schlafdauer, Ruhepuls, HRV, SpO2, Temperatur) zu Intervals.icu.
   * Sämtliche Trainingssteuerung, Leistungsdiagnostik und das erweiterte Dashboard sind exklusiv in eine separate Companion-App überführt.
 
@@ -63,7 +63,7 @@
 ## 1.2.3 (2026-09-07)
 
 ### Fixes & Optimizations
-* **Intervals.icu API Payload:** Nicht unterstütztes Feld `skinTemp` aus dem PUT-Payload entfernt, wodurch HTTP 422 Fehler behoben sind. Lokale Temperaturüberwachung bleibt im CoachBrain aktiv.
+* **Intervals.icu API Payload:** Nicht unterstütztes Feld `skinTemp` aus dem PUT-Payload entfernt, wodurch HTTP 422 Fehler behoben sind. Lokale Temperaturüberwachung bleibt im Sync-Modul aktiv.
 * **Intelligenter Datums-Fallback:** Automatischer Fallback auf den jüngsten Schlafeintrag, falls für das aktuelle Datum noch kein Schlafzyklus abgeschlossen ist.
 * **Persistenter Discover-Tab-Status:** Zuverlässige Erhaltung der Hub-Kachel-Sichtbarkeit bei Rückkehr aus dem Dashboard oder Activity-Wechseln.
 
@@ -72,10 +72,10 @@
 ### Features & Architecture
 * **Natives Quick-Sync-Hub im Discover-Tab:**
   * Schwebender FAB von Standard-Tabs (Insights, Health, Plan, Me) entfernt.
-  * Native Glassmorphism-Kachel exklusiv im Discover-Tab integriert mit Tages-Readiness, Wattkorridor-Empfehlung (301 W FTP), TSB-Status, Periodisierungsphase und Sofort-Sync-Button.
+  * Native Glassmorphism-Kachel exklusiv im Discover-Tab integriert mit Tages-Readiness, Wattkorridor-Empfehlung, TSB-Status, Periodisierungsphase und Sofort-Sync-Button.
   * Latenzfreie Umschaltung via Window-Touch-Callback auf der unteren Navigationsleiste.
 * **Erweiterter Coach-Reiter im Embedded Dashboard:**
-  * Vollwertiger Startreiter mit Tages-Freigabe, Wattkorridoren nach Coggan/Hunter, Durability-Leitfaden für Spätbelastungen über 2.000 kJ, Formsteuerung (CTL/ATL/TSB) und veganer Verpflegungsstrategie.
+  * Vollwertiger Startreiter mit Tages-Freigabe, Wattkorridoren nach Coggan/Hunter, Formsteuerung (CTL/ATL/TSB) und Periodisierung.
 * **Schlafapnoe-Monitoring (OSA):**
   * Nativer Freischalt-Hook in UserInfo (`isOSAHSAgreeTerm = 1`, `hasOpenOSAReport = 1`).
   * Nächtliche OSA-Auswertung und SpO2-Tiefstwerte direkt im Dashboard und Datenprovider verfügbar.

@@ -36,7 +36,7 @@ import java.util.Locale;
 
 public class HookHelper {
 
-    public static final String TAG_CARD = "CYCLING_COACH_DISCOVER_CARD";
+    public static final String TAG_CARD = "RINGCONN_SYNC_DISCOVER_CARD";
     public static final String TAG_OLD_FAB = "INTERVALS_SYNC_FAB";
     private static volatile boolean sInDiscoverTab = false;
     private static volatile boolean sInSubmenu = false;
