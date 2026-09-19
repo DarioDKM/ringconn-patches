@@ -10,7 +10,7 @@ This repository provides two modular patches that can be toggled independently i
 
 ### 1. RingConn Health Data Provider (`ringconn-provider`)
 * **Local SQLite ContentProvider:** Injects and registers `com.gdjztech.ringconn.provider.HealthDataProvider` with authority `com.gdjztech.ringconn.provider`.
-* Sets `android:debuggable="true"` in `AndroidManifest.xml` so external companion tools, Tasker, Termux, and automation scripts can query sleep stages, resting HR, HRV, and temperature offset via ContentResolver without root.
+* Sets `android:debuggable="true"` in `AndroidManifest.xml` so external companion tools such as [Intervals Direct](https://github.com/DarioDKM/IntervalsDirect), Tasker, Termux, and automation scripts can query sleep stages, resting HR, HRV, and temperature offset via ContentResolver without root.
 * Lightweight: no UI elements, zero overhead.
 
 ### 2. Intervals.icu Quick-Sync Tile (`ringconn-dashboard`)

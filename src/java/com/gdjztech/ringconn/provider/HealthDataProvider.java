@@ -152,6 +152,11 @@ public class HealthDataProvider extends ContentProvider {
                 }
                 result.putBoolean("success", true);
                 return result;
+            } else if ("triggerSync".equalsIgnoreCase(method)) {
+                String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(new java.util.Date());
+                org.json.JSONObject res = IntervalsSyncEngine.syncDate(getContext(), today);
+                result.putBoolean("success", res != null && res.optBoolean("success", false));
+                return result;
             }
         } catch (Exception e) {
             result.putBoolean("success", false);
