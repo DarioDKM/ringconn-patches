@@ -242,6 +242,15 @@ public class HookHelper {
 
         card.addView(btnSync);
 
+        // Tapping card background opens detailed IntervalsActivity
+        card.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(activity, IntervalsActivity.class);
+                activity.startActivity(intent);
+            }
+        });
+
         return card;
     }
 

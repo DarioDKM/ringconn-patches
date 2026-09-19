@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.9 (2026-09-19)
+
+### Fixes & Stabilität im Dashboard-Fenster
+* **Korrektur der JavaScript-Syntax im Intervals.icu Hub (`DashboardHtml.java`):**
+  * Behebung eines gravierenden Anführungszeichen-Syntaxfehlers in HTML/JS-String-Templates, der das Ausführen des gesamten Frontend-Skripts blockierte.
+  * Korrekte Initialisierung und Live-Befüllung der Vitalwerte (Schlafdauer, Ruhepuls, HRV, Hauttemperatur, Schlafphasen-Balken und Effizienz).
+  * Wiederherstellung der Interaktivität für alle Reiter (Sync, Historie, Einstellungen, Logs) sowie für den manuellen Übertragungs- und Schließen-Button.
+* **Erweiterte Kachel-Interaktion (`HookHelper.java`):**
+  * Klicks auf den gesamten Hintergrund der Kachel öffnen nun zuverlässig das Detailfenster (nicht mehr nur die Headerzeile).
+* **Systemleisten-Integration (`IntervalsActivity.java`):**
+  * `setFitsSystemWindows(true)` aktiviert, damit Header und Schließen-Button nicht von Display-Ausschnitten oder der Statusleiste verdeckt werden.
+  * WebChromeClient Konsolen-Logging für WebView-Diagnose ergänzt.
+
 ## 1.2.8 (2026-09-17)
 
 ### Fokussierung & Bereinigung
